@@ -10,7 +10,7 @@ import { useDatabase } from "@/services/db";
 // router example: https://github.com/EcoPasteHub/EcoPaste/blob/master/src/router/index.ts
 
 export default function App() {
-  const db = useDatabase();
+  //const db = useDatabase();
 
   async function loadProducts() {
     /*try {

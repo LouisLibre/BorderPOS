@@ -1,36 +1,29 @@
+import React from "react";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useDatabase } from "@/services/db";
 
 const itemsPerPage = 12;
 
 export function Products() {
-  const [currentPage, setCurrentPage] = useState(0);
+  const [items, setItems] = useState([]);
+  const db = useDatabase();
+
+  const loadProducts = async () => {
+    try {
+      const sql = await db.getConnection();
+
+      const rows = await sql.select("SELECT * FROM products");
+      setItems(rows);
+    } catch (err) {
+      console.error("Error querying products:", err.message);
+    }
+  };
+
+  React.useEffect(() => {
+    loadProducts();
+  }, []);
 
   // max 66 characters per name
-  const items = [
-    { type: "item", name: "Tortillas de Harina" },
-    {
-      type: "item",
-      name: "Tortillas de Mantequilla 1kg",
-    },
-    { type: "item", name: "Tortillas Integral" },
-    { type: "item", name: "Tortillas Maiz 1kg" },
-    { type: "item", name: "Tortillas Integral" },
-    { type: "item", name: "Tortillas Maiz 1kg" },
-    { type: "item", name: "Tortillas Integral" },
-    { type: "item", name: "Tortillas Maiz 1kg" },
-    { type: "item", name: "Tortillas Integral" },
-    { type: "item", name: "Tortillas Maiz 1kg" },
-    { type: "item", name: "Tortillas Integral" },
-    { type: "item", name: "Tortillas Maiz 1kg" },
-    { type: "item", name: "Tortillas Integral" },
-    { type: "item", name: "Tortillas Maiz 1kg" },
-    { type: "item", name: "Tortillas Integral" },
-    { type: "item", name: "Tortillas Maiz 1kg" },
-    { type: "item", name: "Tortillas Integral" },
-    { type: "item", name: "Tortillas Maiz 1kg" },
-  ];
 
   return (
     <div className="p-4 flex-1 flex flex-col h-full overflow-y-auto">
@@ -39,11 +32,9 @@ export function Products() {
           {items.map((item, index) => (
             <button
               key={index}
-              className={`aspect-square row-span-1 col-span-1 flex items-center justify-center px-2 py-1 text-sm border-2 rounded-lg hover:bg-accent overflow-hidden ${
-                item.type === "group" ? "shadow-md" : ""
-              }`}
+              className={`aspect-square row-span-1 col-span-1 flex items-center justify-center px-2 py-1 text-sm border-2 rounded-lg hover:bg-accent overflow-hidden`}
             >
-              {item.name}
+              {item.product_name}
             </button>
           ))}
         </div>

@@ -26,6 +26,11 @@ pub fn run() {
               .id("show-db-folder")            // internal ID for on_menu_event matching
               .build(app)?;
 
+            let reload_app = MenuItemBuilder::new("Reload")
+            .id("reload-app")
+            .accelerator("CmdOrCtrl+R") // Optional: adds a keyboard shortcut
+            .build(app)?;
+
             let app_submenu = SubmenuBuilder::new(app, "App")
                 .about(Some(AboutMetadata {
                     ..Default::default()
@@ -38,6 +43,7 @@ pub fn run() {
                 .separator()
                 // Add our custom quit item last
                 .item(&show_db_folder)
+                .item(&reload_app)      // New "Reload" item
                 .item(&custom_quit)
                 .build()?;
 
@@ -67,6 +73,13 @@ pub fn run() {
                   }
                   println!("Show DB Folder clicked"); 
                 }
+
+                if event.id() == reload_app.id() {
+                  // Reload the app window - Tauri v2 method
+                  for window in app_handle.webview_windows().values() {
+                      let _ = window.eval("window.location.reload()");
+                  }
+              }
             });
 
             Ok(())
