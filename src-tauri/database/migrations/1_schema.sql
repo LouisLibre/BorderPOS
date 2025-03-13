@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS products (
     sku               TEXT PRIMARY KEY,
-    vendor_sku        TEXT, --Internal SKU may differ from vendor SKU
+    plu_code          TEXT, -- price lookup code
+    barcode           TEXT,
     product_name      TEXT NOT NULL,
     price             DECIMAL(10,2) NOT NULL,
     created_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
