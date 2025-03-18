@@ -19,7 +19,9 @@ function Modal({ children, isOpen, handleClose }) {
 
   return (
     <div className="modal" onClick={handleOverlayClick}>
-      <div className="modal-content">{children}</div>
+      <div style={{ borderRadius: "10px" }} className="modal-content">
+        {children}
+      </div>
     </div>
   );
 }

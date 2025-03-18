@@ -259,10 +259,12 @@ export function SalesBar() {
       <PaymentModal
         handleClose={() => setIsPaymentModalOpen(false)}
         isOpen={isPaymentModalOpen}
+        style={{ borderRadius: "100px" }}
       >
         <PaymentScreen
           handleClose={() => setIsPaymentModalOpen(false)}
           totalDue={total}
+          style={{ borderRadius: "100px" }}
         />
       </PaymentModal>
     </>

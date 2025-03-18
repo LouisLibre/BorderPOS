@@ -172,7 +172,7 @@ const PaymentScreen = ({ totalDue = 0, handleClose }) => {
     <div style={styles.container}>
       <div style={styles.titleBar}>
         <button style={styles.cancelButton} onClick={handleCancel}>
-          Regresar
+          Cancelar
         </button>
         <span style={styles.title}>Pagar Ticket ${totalDue.toFixed(2)}</span>
       </div>
@@ -282,7 +282,6 @@ const PaymentScreen = ({ totalDue = 0, handleClose }) => {
             <span style={styles.tenderLabel}></span>
             <span style={styles.amount}>${paymentAmount}</span>
           </div>
-
           <div style={styles.keypad}>
             <button style={styles.key} onClick={() => handleNumberClick("7")}>
               7
@@ -293,11 +292,7 @@ const PaymentScreen = ({ totalDue = 0, handleClose }) => {
             <button style={styles.key} onClick={() => handleNumberClick("9")}>
               9
             </button>
-            <button
-              style={styles.backspaceKey}
-              onClick={handleBackspace}
-              rowSpan={2}
-            >
+            <button style={styles.backspaceKey} onClick={handleBackspace}>
               ⌫
             </button>
             <button style={styles.key} onClick={() => handleNumberClick("4")}>
@@ -324,7 +319,6 @@ const PaymentScreen = ({ totalDue = 0, handleClose }) => {
             <button
               style={styles.zeroKey}
               onClick={() => handleNumberClick("00")}
-              colSpan={2}
             >
               00
             </button>
@@ -334,9 +328,6 @@ const PaymentScreen = ({ totalDue = 0, handleClose }) => {
             <button style={styles.specialKey} onClick={handleDecimal}>
               .
             </button>
-          </div>
-
-          <div style={styles.presetAmounts}>
             <button
               style={styles.presetKeyExtended}
               onClick={() => handlePresetAmount(totalDue.toFixed(2))}
@@ -355,9 +346,6 @@ const PaymentScreen = ({ totalDue = 0, handleClose }) => {
             >
               $20
             </button>
-          </div>
-
-          <div style={styles.presetAmounts}>
             <button
               style={styles.presetKey}
               onClick={() => handlePresetAmount("50.00")}
@@ -395,10 +383,12 @@ const styles = {
     height: "100%",
     fontFamily: "Arial, sans-serif",
     flexDirection: "column",
+    borderRadius: "10px",
   },
   mainContent: {
     display: "flex",
     height: "100%",
+    borderRadius: "10px",
   },
   titleBar: {
     display: "flex",
@@ -410,6 +400,8 @@ const styles = {
     boxShadow: "0 0.2px 0.2px rgba(0, 0, 0, 0.1)",
     height: "44px",
     position: "relative",
+    borderTopLeftRadius: "10px",
+    borderTopRightRadius: "10px",
   },
   cancelButton: {
     padding: "8px 16px",
@@ -431,13 +423,14 @@ const styles = {
   leftSidebar: {
     width: "40%",
     padding: "18px",
-    paddingBottom: "19px",
+    paddingBottom: "18px",
     backgroundColor: "#f5f7fa",
     borderRight: "1px solid #ddd",
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
+    gap: "14px",
     overflowY: "auto",
+    borderBottomLeftRadius: "10px",
   },
   breakdown: {
     flex: 1,
@@ -450,9 +443,11 @@ const styles = {
   },
   keypadSection: {
     width: "60%",
-    padding: "16px",
+    padding: "18px",
     display: "flex",
     flexDirection: "column",
+    flex: 1, // Add this
+    gap: "10px",
   },
   paymentAmount: {
     display: "flex",
@@ -474,9 +469,9 @@ const styles = {
   keypad: {
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",
-    gridTemplateRows: "repeat(4, 1fr)",
+    gridTemplateRows: "repeat(6, 1fr)", // Changed from 4 to 6 to accommodate preset buttons
     gap: "10px",
-    marginBottom: "12px",
+    flex: 1,
   },
   key: {
     padding: "16px",
@@ -488,7 +483,10 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    height: "100%", // Add this
   },
+
+  // Do the same for zeroKey, backspaceKey, and specialKey styles
   zeroKey: {
     padding: "16px",
     fontSize: "16px",
@@ -527,12 +525,11 @@ const styles = {
   presetAmounts: {
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",
-    marginTop: "12px",
     gap: "10px",
+    flex: 0,
   },
   presetKeyExtended: {
     gridColumn: "span 2",
-    padding: "15px",
     fontSize: "16px",
     border: "1px solid #ddd",
     borderRadius: "5px",
@@ -540,9 +537,12 @@ const styles = {
     cursor: "pointer",
     color: "#444",
     fontWeight: "550",
+    height: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   presetKey: {
-    padding: "15px",
     fontSize: "16px",
     border: "1px solid #ddd",
     borderRadius: "5px",
@@ -550,6 +550,10 @@ const styles = {
     cursor: "pointer",
     color: "#444",
     fontWeight: "550",
+    height: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   paymentMethods: {
     display: "grid",
@@ -560,7 +564,7 @@ const styles = {
   paymentMethod: {
     padding: "10px",
     fontSize: "14px",
-    border: "1.5px solid #ccc",
+    border: "1.5px solid #1e4d2b",
     borderRadius: "5px",
     backgroundColor: "#fff",
     cursor: "pointer",
@@ -573,14 +577,15 @@ const styles = {
     width: "100%",
   },
   selectedPaymentMethod: {
-    border: "1.5px solid black",
+    border: "1.5px solid #1e4d2b",
+    backgroundColor: "#e9ffdb",
   },
   icon: {
     fontSize: "20px",
-    color: "#666",
+    color: "#006600",
   },
   finalizeButton: {
-    padding: "49px",
+    padding: "41.5px",
     fontSize: "16px",
     border: "none",
     borderRadius: "5px",
