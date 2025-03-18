@@ -1,16 +1,23 @@
 import React, { useState } from "react";
-import { DollarSign, CreditCard, Wallet } from "lucide-react";
+import {
+  DollarSign,
+  CreditCard,
+  Wallet,
+  Banknote,
+  HandCoins,
+  CircleDollarSign,
+} from "lucide-react";
 
 const PaymentScreen = () => {
-  const [paymentAmount, setPaymentAmount] = useState("4.34");
-  const [balanceDue, setBalanceDue] = useState(4.34);
+  const [paymentAmount, setPaymentAmount] = useState("0.00");
+  const [balanceDue, setBalanceDue] = useState(-4.34); // Start with negative balance
   const [selectedMethod, setSelectedMethod] = useState("CASH");
   const [payments, setPayments] = useState({
     CASH: 0,
+    DOLLARS: 0,
     CARD: 0,
     OTHER: 0,
   });
-  const [notification, setNotification] = useState(""); // For visual feedback
 
   const handleNumberClick = (number) => {
     setPaymentAmount((prev) => {
@@ -53,39 +60,49 @@ const PaymentScreen = () => {
         ...prev,
         [method]: prev[method] + amount,
       }));
-      setBalanceDue((prev) => Math.max(0, prev - amount));
-      setNotification(`Added $${amount.toFixed(2)} via ${method}`);
-      setTimeout(() => setNotification(""), 2000);
+      setBalanceDue((prev) => prev + amount); // Add to negative balance
       setPaymentAmount("0.00");
     }
   };
 
   const handleFinalizePayment = () => {
-    if (balanceDue === 0) {
+    if (balanceDue >= 0) {
+      // Changed condition to >= 0
       alert("Payment finalized successfully!");
-      setPayments({ CASH: 0, CARD: 0, OTHER: 0 });
-      setBalanceDue(4.34);
-      setPaymentAmount("4.34");
+      setPayments({ CASH: 0, DOLLARS: 0, CARD: 0, OTHER: 0 });
+      setBalanceDue(-4.34); // Reset to negative
+      setPaymentAmount("0.00");
       setSelectedMethod("CASH");
     }
   };
 
   const handleCancel = () => {
     setPaymentAmount("0.00");
-    setNotification("");
   };
+
+  // Format balance display based on value
+  const formatBalance = () => {
+    const absBalance = Math.abs(balanceDue).toFixed(2);
+    if (balanceDue < 0) {
+      return { text: `-$${absBalance}`, color: "red" };
+    } else {
+      return { text: `+$${absBalance}`, color: "green" };
+    }
+  };
+
+  const balanceDisplay = formatBalance();
 
   return (
     <div style={styles.container}>
       <div style={styles.leftSidebar}>
         <div style={styles.breakdown}>
           <div style={styles.breakdownItem}>
-            <span>CASH:</span>
+            <span>PESOS:</span>
             <span>${payments.CASH.toFixed(2)}</span>
           </div>
           <div style={styles.breakdownItem}>
             <span>DOLLARS:</span>
-            <span>${payments.CARD.toFixed(2)}</span>
+            <span>${payments.DOLLARS.toFixed(2)}</span>
           </div>
           <div style={styles.breakdownItem}>
             <span>CARD:</span>
@@ -96,12 +113,11 @@ const PaymentScreen = () => {
             <span>${payments.OTHER.toFixed(2)}</span>
           </div>
           <div style={styles.breakdownItem}>
-            <span style={{ color: "red" }}>BALANCE DUE:</span>
-            <span style={{ color: "red" }}>${balanceDue.toFixed(2)}</span>
+            <span style={{ color: balanceDisplay.color }}>BALANCE:</span>
+            <span style={{ color: balanceDisplay.color }}>
+              {balanceDisplay.text}
+            </span>
           </div>
-          {notification && (
-            <div style={styles.notification}>{notification}</div>
-          )}
         </div>
 
         <div style={styles.paymentMethods}>
@@ -113,8 +129,19 @@ const PaymentScreen = () => {
             }
             onClick={() => handlePaymentMethod("CASH")}
           >
-            <DollarSign style={styles.icon} />
-            <span>+ Cash</span>
+            <CircleDollarSign style={styles.icon} />
+            <span>Pesos</span>
+          </button>
+          <button
+            style={
+              selectedMethod === "DOLLARS"
+                ? { ...styles.paymentMethod, ...styles.selectedPaymentMethod }
+                : styles.paymentMethod
+            }
+            onClick={() => handlePaymentMethod("DOLLARS")}
+          >
+            <Banknote style={styles.icon} />
+            <span>Dollars</span>
           </button>
           <button
             style={
@@ -125,7 +152,7 @@ const PaymentScreen = () => {
             onClick={() => handlePaymentMethod("CARD")}
           >
             <CreditCard style={styles.icon} />
-            <span>+ Card</span>
+            <span>Card</span>
           </button>
           <button
             style={
@@ -136,17 +163,17 @@ const PaymentScreen = () => {
             onClick={() => handlePaymentMethod("OTHER")}
           >
             <Wallet style={styles.icon} />
-            <span>+ Other</span>
+            <span>Other</span>
           </button>
         </div>
 
         <button
           style={{
             ...styles.finalizeButton,
-            ...(balanceDue !== 0 ? styles.disabledButton : {}),
+            ...(balanceDue < 0 ? styles.disabledButton : {}),
           }}
           onClick={handleFinalizePayment}
-          disabled={balanceDue !== 0}
+          disabled={balanceDue < 0}
         >
           Finalize Payment
         </button>
@@ -242,10 +269,11 @@ const PaymentScreen = () => {
   );
 };
 
+// Styles remain the same
 const styles = {
   container: {
     display: "flex",
-    height: "100%", // Ensure full viewport height
+    height: "100%",
     fontFamily: "Arial, sans-serif",
   },
   leftSidebar: {
@@ -256,7 +284,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "20px",
-    overflowY: "auto", // Make sidebar scrollable if content overflows
+    overflowY: "auto",
   },
   breakdown: {
     flex: 1,
@@ -266,14 +294,6 @@ const styles = {
     justifyContent: "space-between",
     marginBottom: "10px",
     fontSize: "16px",
-  },
-  notification: {
-    marginTop: "10px",
-    padding: "10px",
-    backgroundColor: "#e7f3fe",
-    color: "#3178c6",
-    borderRadius: "5px",
-    textAlign: "center",
   },
   keypadSection: {
     width: "60%",
@@ -367,8 +387,9 @@ const styles = {
     color: "#007bff",
   },
   paymentMethods: {
-    display: "flex",
-    flexDirection: "column", // Stack buttons vertically
+    display: "grid",
+    gridTemplateColumns: "repeat(2, 1fr)",
+    gridTemplateRows: "repeat(2, 1fr)",
     gap: "10px",
   },
   paymentMethod: {
@@ -384,7 +405,7 @@ const styles = {
     color: "#333",
     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
     justifyContent: "center",
-    width: "100%", // Ensure buttons take full width of the container
+    width: "100%",
   },
   selectedPaymentMethod: {
     border: "2px solid #007bff",
