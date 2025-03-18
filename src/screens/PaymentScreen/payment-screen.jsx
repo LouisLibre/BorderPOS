@@ -6,9 +6,14 @@ import {
   Banknote,
   HandCoins,
   CircleDollarSign,
+  Eraser,
 } from "lucide-react";
 
-const PaymentScreen = ({ totalDue = 0, handleClose }) => {
+const PaymentScreen = ({
+  totalDue = 0,
+  dollarToPesosRate = 20,
+  handleClose,
+}) => {
   const [paymentAmount, setPaymentAmount] = useState(totalDue.toFixed(2));
   const [balanceDue, setBalanceDue] = useState(-Math.abs(totalDue));
   const [selectedMethod, setSelectedMethod] = useState("CASH");
@@ -19,14 +24,50 @@ const PaymentScreen = ({ totalDue = 0, handleClose }) => {
     OTHER: 0,
   });
   const [isNewEntry, setIsNewEntry] = useState(true);
-  const [activeMethod, setActiveMethod] = useState(null); // New state to track pressed button
+  const [activeMethod, setActiveMethod] = useState(null);
 
   const calculateTotal = () => {
-    const total = Object.values(payments).reduce(
-      (sum, value) => sum + value,
-      0
-    );
+    const total =
+      payments.CASH +
+      payments.DOLLARS * dollarToPesosRate +
+      payments.CARD +
+      payments.OTHER;
     return total.toFixed(2);
+  };
+
+  // Reset individual payment methods
+  const resetPayment = (method) => {
+    const amountToSubtract =
+      method === "DOLLARS"
+        ? payments[method] * dollarToPesosRate
+        : payments[method];
+
+    setPayments((prev) => ({
+      ...prev,
+      [method]: 0,
+    }));
+    setBalanceDue((prev) => prev - amountToSubtract);
+  };
+
+  // Reset dollars specifically (affects both DOLLARS and conversion line)
+  const resetDollars = () => {
+    const amountToSubtract = payments.DOLLARS * dollarToPesosRate;
+    setPayments((prev) => ({
+      ...prev,
+      DOLLARS: 0,
+    }));
+    setBalanceDue((prev) => prev - amountToSubtract);
+  };
+
+  // Reset all payments
+  const resetAll = () => {
+    setPayments({
+      CASH: 0,
+      DOLLARS: 0,
+      CARD: 0,
+      OTHER: 0,
+    });
+    setBalanceDue(-Math.abs(totalDue));
   };
 
   const handleNumberClick = (number) => {
@@ -108,33 +149,31 @@ const PaymentScreen = ({ totalDue = 0, handleClose }) => {
         ...prev,
         [method]: prev[method] + amount,
       }));
-      setBalanceDue((prev) => prev + amount);
+      const amountToAdd =
+        method === "DOLLARS" ? amount * dollarToPesosRate : amount;
+      setBalanceDue((prev) => prev + amountToAdd);
       setPaymentAmount("0");
       setIsNewEntry(true);
     }
   };
 
-  // Handle mouse/touch down to apply active style
   const handleMouseDown = (method) => {
     setActiveMethod(method);
   };
 
-  // Remove active style when mouse/touch is released
   const handleMouseUp = () => {
     setActiveMethod(null);
   };
 
-  const getCobrarButtonState = () => {
-    if (balanceDue === -Math.abs(totalDue)) {
-      return { label: "Pago Exacto", disabled: false };
-    } else if (balanceDue < 0) {
+  const getCobrarButtonState = React.useCallback(() => {
+    if (balanceDue < 0) {
       return { label: "Pago Incompleto", disabled: true };
     } else if (balanceDue === 0) {
       return { label: "Pago Exacto", disabled: false };
     } else {
-      return { label: "Entregar Cambio", disabled: false };
+      return { label: `Entregar Cambio $${balanceDue}`, disabled: false };
     }
-  };
+  }, [balanceDue]);
 
   const handleFinalizePayment = () => {
     const buttonState = getCobrarButtonState();
@@ -159,8 +198,10 @@ const PaymentScreen = ({ totalDue = 0, handleClose }) => {
   const formatBalance = () => {
     const absBalance = Math.abs(balanceDue).toFixed(2);
     if (balanceDue < 0) {
-      return { text: `-$${absBalance}`, color: "black" };
-    } else {
+      return { text: `-$${absBalance}`, color: "red" };
+    } else if (balanceDue === 0) {
+      return { text: `0`, color: "black" };
+    } else if (balanceDue > 0) {
       return { text: `+$${absBalance}`, color: "green" };
     }
   };
@@ -181,28 +222,67 @@ const PaymentScreen = ({ totalDue = 0, handleClose }) => {
         <div style={styles.leftSidebar}>
           <div style={styles.breakdown}>
             <div style={styles.breakdownItem}>
-              <span>PESOS:</span>
-              <span>${payments.CASH.toFixed(2)}</span>
+              <span>PESOS</span>
+              <div style={styles.amountContainer}>
+                <span>${payments.CASH.toFixed(2)}</span>
+                <Eraser
+                  style={styles.eraserIcon}
+                  onClick={() => resetPayment("CASH")}
+                />
+              </div>
             </div>
             <div style={styles.breakdownItem}>
-              <span>DOLARES:</span>
-              <span>${payments.DOLLARS.toFixed(2)}</span>
+              <span style={{ color: "gray" }}>DOLARES</span>
+              <div style={styles.amountContainer}>
+                <span style={{ color: "gray" }}>
+                  ${payments.DOLLARS.toFixed(2)}
+                </span>
+                <Eraser style={styles.eraserIcon} onClick={resetDollars} />
+              </div>
             </div>
             <div style={styles.breakdownItem}>
-              <span>TARJETA:</span>
-              <span>${payments.CARD.toFixed(2)}</span>
+              <span style={{ color: "black" }}>
+                ↳1 DOLAR = {dollarToPesosRate} PESOS
+              </span>
+              <div style={styles.amountContainer}>
+                <span style={{ color: "black" }}>
+                  ${(payments.DOLLARS * dollarToPesosRate).toFixed(2)}
+                </span>
+                <Eraser style={styles.eraserIcon} onClick={resetDollars} />
+              </div>
             </div>
             <div style={styles.breakdownItem}>
-              <span>OTROS:</span>
-              <span>${payments.OTHER.toFixed(2)}</span>
+              <span>TARJETA</span>
+              <div style={styles.amountContainer}>
+                <span>${payments.CARD.toFixed(2)}</span>
+                <Eraser
+                  style={styles.eraserIcon}
+                  onClick={() => resetPayment("CARD")}
+                />
+              </div>
+            </div>
+            <div style={styles.breakdownItem}>
+              <span>OTROS</span>
+              <div style={styles.amountContainer}>
+                <span>${payments.OTHER.toFixed(2)}</span>
+                <Eraser
+                  style={styles.eraserIcon}
+                  onClick={() => resetPayment("OTHER")}
+                />
+              </div>
             </div>
             <div style={styles.breakdownItem}>
               <span style={{ color: balanceDisplay.color, fontWeight: "bold" }}>
-                BALANCE:
+                BALANCE
               </span>
-              <span style={{ color: balanceDisplay.color, fontWeight: "bold" }}>
-                {balanceDisplay.text}
-              </span>
+              <div style={styles.amountContainer}>
+                <span
+                  style={{ color: balanceDisplay.color, fontWeight: "bold" }}
+                >
+                  {balanceDisplay.text}
+                </span>
+                <Eraser style={styles.eraserIcon} onClick={resetAll} />
+              </div>
             </div>
           </div>
 
@@ -215,7 +295,7 @@ const PaymentScreen = ({ totalDue = 0, handleClose }) => {
               }
               onMouseDown={() => handleMouseDown("CASH")}
               onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp} // Ensure style resets if mouse leaves while pressed
+              onMouseLeave={handleMouseUp}
               onClick={() => handlePaymentMethod("CASH")}
             >
               <CircleDollarSign style={styles.icon} />
@@ -441,12 +521,24 @@ const styles = {
     marginBottom: "10px",
     fontSize: "16px",
   },
+  amountContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+  eraserIcon: {
+    width: "16px",
+    height: "16px",
+    cursor: "pointer",
+    color: "#666",
+    transition: "color 0.2s",
+  },
   keypadSection: {
     width: "60%",
     padding: "18px",
     display: "flex",
     flexDirection: "column",
-    flex: 1, // Add this
+    flex: 1,
     gap: "10px",
   },
   paymentAmount: {
@@ -469,7 +561,7 @@ const styles = {
   keypad: {
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",
-    gridTemplateRows: "repeat(6, 1fr)", // Changed from 4 to 6 to accommodate preset buttons
+    gridTemplateRows: "repeat(6, 1fr)",
     gap: "10px",
     flex: 1,
   },
@@ -483,10 +575,8 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    height: "100%", // Add this
+    height: "100%",
   },
-
-  // Do the same for zeroKey, backspaceKey, and specialKey styles
   zeroKey: {
     padding: "16px",
     fontSize: "16px",
@@ -601,6 +691,11 @@ const styles = {
     cursor: "not-allowed",
     opacity: "0.6",
   },
+};
+
+// Add hover effect to eraserIcon
+styles.eraserIcon[":hover"] = {
+  color: "#ff4444",
 };
 
 export default PaymentScreen;
