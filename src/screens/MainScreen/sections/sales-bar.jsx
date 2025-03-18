@@ -82,7 +82,7 @@ export function SalesBar() {
                 {
                   // no number in the first ticket, reverse the icon
                 }
-                Current Ticket
+                Ticket de Venta
               </TabsTrigger>
               {/* TODO: Remove commented code when ready to implement tabs
             <TabsTrigger
@@ -117,9 +117,9 @@ export function SalesBar() {
               className="cursor-default"
             >
               <tr className="text-sm font-medium">
-                <th className="text-left px-2 pl-2.5 py-2 w-[40%]">Product</th>
-                <th className="text-right px-2 py-2 w-[20%]">Qty</th>
-                <th className="text-right px-2 pr-2.5 py-2 w-[40%]">Amt</th>
+                <th className="text-left px-2 pl-2.5 py-2 w-[40%]">Producto</th>
+                <th className="text-right px-2 py-2 w-[20%]">Cant</th>
+                <th className="text-right px-2 pr-2.5 py-2 w-[40%]">Monto</th>
               </tr>
             </thead>
             <tbody>
@@ -231,7 +231,7 @@ export function SalesBar() {
             </div>
 
             <div className="flex justify-between items-center text-muted-foreground text-sm min-h-8">
-              <div>Taxes</div>
+              <div>Impuestos</div>
               <div className="font-bold text-right">${taxes.toFixed(2)}</div>
             </div>
           </div>
@@ -241,7 +241,7 @@ export function SalesBar() {
               onClick={() => setIsPaymentModalOpen(true)}
               className="flex justify-between items-center bg-black text-white hover:bg-black/70 h-14"
             >
-              <div className="text-xl">Pay Now</div>
+              <div className="text-xl">Pagar</div>
               <div className="text-xl font-bold text-right">
                 ${total.toFixed(2)}
               </div>
@@ -251,7 +251,7 @@ export function SalesBar() {
               className="flex justify-between items-center h-10"
               onClick={clearCart}
             >
-              <div className="text-xl">Cancel</div>
+              <div className="text-lg">Limpiar</div>
             </Button>
           </div>
         </div>
@@ -260,7 +260,10 @@ export function SalesBar() {
         handleClose={() => setIsPaymentModalOpen(false)}
         isOpen={isPaymentModalOpen}
       >
-        <PaymentScreen />
+        <PaymentScreen
+          handleClose={() => setIsPaymentModalOpen(false)}
+          totalDue={total}
+        />
       </PaymentModal>
     </>
   );

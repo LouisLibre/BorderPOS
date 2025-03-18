@@ -17,7 +17,7 @@ const useGlobalStore = create((set) => ({
 
       // If item doesn't exist, add it with quantity 1
       return {
-        cartItems: [...state.cartItems, { ...item, quantity: 999 }],
+        cartItems: [...state.cartItems, { ...item, quantity: 1 }],
       };
     }),
   removeItem: (sku) =>
