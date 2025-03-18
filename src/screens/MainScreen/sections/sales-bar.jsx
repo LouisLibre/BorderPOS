@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useRef } from "react";
 import useGlobalStore from "@/hooks/useGlobalStore";
 import PaymentModal from "@/screens/PaymentScreen/modal";
+import PaymentScreen from "@/screens/PaymentScreen/payment-screen";
 
 export function SalesBar() {
   const [selectedTicket, setSelectedTicket] = useState("ticket1");
@@ -259,7 +260,7 @@ export function SalesBar() {
         handleClose={() => setIsPaymentModalOpen(false)}
         isOpen={isPaymentModalOpen}
       >
-        Here is the payment modal
+        <PaymentScreen />
       </PaymentModal>
     </>
   );
