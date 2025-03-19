@@ -14,7 +14,7 @@ const PaymentScreen = ({
   dollarToPesosRate = 20,
   handleClose,
 }) => {
-  const [paymentAmount, setPaymentAmount] = useState(totalDue.toFixed(2));
+  const [paymentAmount, setPaymentAmount] = useState(0);
   const [balanceDue, setBalanceDue] = useState(-Math.abs(totalDue));
   const [selectedMethod, setSelectedMethod] = useState("CASH");
   const [payments, setPayments] = useState({
@@ -384,6 +384,12 @@ const PaymentScreen = ({
             <button style={styles.key} onClick={() => handleNumberClick("6")}>
               6
             </button>
+            <button
+              style={{ ...styles.specialKey, gridRow: "span 1" }}
+              onClick={handleClear}
+            >
+              C
+            </button>
             <button style={styles.key} onClick={() => handleNumberClick("1")}>
               1
             </button>
@@ -393,19 +399,19 @@ const PaymentScreen = ({
             <button style={styles.key} onClick={() => handleNumberClick("3")}>
               3
             </button>
-            <button style={styles.specialKey} onClick={handleClear}>
-              C
+            <button
+              style={styles.specialKey}
+              onClick={() => console.log("add")}
+            >
+              add
             </button>
             <button
               style={styles.zeroKey}
-              onClick={() => handleNumberClick("00")}
+              onClick={() => handleNumberClick("0")}
             >
-              00
-            </button>
-            <button style={styles.key} onClick={() => handleNumberClick("0")}>
               0
             </button>
-            <button style={styles.specialKey} onClick={handleDecimal}>
+            <button style={styles.key} onClick={() => handleNumberClick(".")}>
               .
             </button>
             <button
@@ -596,7 +602,7 @@ const styles = {
     borderRadius: "5px",
     backgroundColor: "#e0e0e0",
     cursor: "pointer",
-    gridRow: "span 2",
+    gridRow: "span 1",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -608,6 +614,7 @@ const styles = {
     borderRadius: "5px",
     backgroundColor: "#e0e0e0",
     cursor: "pointer",
+    gridRow: "span 2", // For the decimal button
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
