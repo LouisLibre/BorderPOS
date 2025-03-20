@@ -7,6 +7,17 @@ import {
   HandCoins,
   CircleDollarSign,
   Eraser,
+  ListRestart,
+  SquareX,
+  X,
+  Trash,
+  Trash2,
+  RotateCcw,
+  RotateCw,
+  RefreshCcw,
+  Undo,
+  Undo2,
+  History,
 } from "lucide-react";
 
 const PaymentScreen = ({
@@ -14,9 +25,9 @@ const PaymentScreen = ({
   dollarToPesosRate = 20,
   handleClose,
 }) => {
-  const [paymentAmount, setPaymentAmount] = useState(0);
+  const [paymentAmount, setPaymentAmount] = useState("0");
   const [balanceDue, setBalanceDue] = useState(-Math.abs(totalDue));
-  const [selectedMethod, setSelectedMethod] = useState("CASH");
+  const [selectedMethods, setSelectedMethods] = useState(["CASH"]); // Default to "CASH" (Pesos)
   const [payments, setPayments] = useState({
     CASH: 0,
     DOLLARS: 0,
@@ -24,7 +35,14 @@ const PaymentScreen = ({
     OTHER: 0,
   });
   const [isNewEntry, setIsNewEntry] = useState(true);
-  const [activeMethod, setActiveMethod] = useState(null);
+  const paymentMethods = ["CASH", "DOLLARS", "CARD", "OTHER"];
+  const selectedIndex = paymentMethods.indexOf(selectedMethods[0]);
+  const paymentMethodsMap = {
+    CASH: { label: "PESOS", icon: <CircleDollarSign style={styles.icon} /> },
+    DOLLARS: { label: "DÓLAR", icon: <Banknote style={styles.icon} /> },
+    CARD: { label: "TARJETA", icon: <CreditCard style={styles.icon} /> },
+    OTHER: { label: "OTROS", icon: <Wallet style={styles.icon} /> },
+  };
 
   const calculateTotal = () => {
     const total =
@@ -141,28 +159,27 @@ const PaymentScreen = ({
     setIsNewEntry(true);
   };
 
-  const handlePaymentMethod = (method) => {
+  // Handle toggle button selection
+  const handlePaymentMethodToggle = (method) => {
+    setSelectedMethods([method]); // Only allow one method to be selected at a time
+  };
+
+  // Handle the "add" button to apply payment to the selected method
+  const handleAddPayment = () => {
     const amount = parseFloat(paymentAmount);
-    if (amount > 0) {
-      setSelectedMethod(method);
-      setPayments((prev) => ({
-        ...prev,
-        [method]: prev[method] + amount,
-      }));
+    if (amount > 0 && selectedMethods.length > 0) {
+      const method = selectedMethods[0]; // Only one method should be selected
       const amountToAdd =
         method === "DOLLARS" ? amount * dollarToPesosRate : amount;
+
+      setPayments((prev) => ({
+        ...prev,
+        [method]: (prev[method] || 0) + amount,
+      }));
       setBalanceDue((prev) => prev + amountToAdd);
       setPaymentAmount("0");
       setIsNewEntry(true);
     }
-  };
-
-  const handleMouseDown = (method) => {
-    setActiveMethod(method);
-  };
-
-  const handleMouseUp = () => {
-    setActiveMethod(null);
   };
 
   const getCobrarButtonState = React.useCallback(() => {
@@ -182,7 +199,7 @@ const PaymentScreen = ({
       setPayments({ CASH: 0, DOLLARS: 0, CARD: 0, OTHER: 0 });
       setBalanceDue(-Math.abs(totalDue));
       setPaymentAmount("0");
-      setSelectedMethod("CASH");
+      setSelectedMethods(["CASH"]); // Reset to default method (Pesos)
       setIsNewEntry(true);
     }
   };
@@ -190,7 +207,7 @@ const PaymentScreen = ({
   const handleCancel = () => {
     setPaymentAmount("0");
     setPayments({ CASH: 0, DOLLARS: 0, CARD: 0, OTHER: 0 });
-    setSelectedMethod("CASH");
+    setSelectedMethods(["CASH"]); // Reset to default method (Pesos)
     setIsNewEntry(true);
     handleClose();
   };
@@ -206,16 +223,52 @@ const PaymentScreen = ({
     }
   };
 
+  const formatBalanceForPresetKey = () => {
+    const absBalance = Math.abs(balanceDue).toFixed(2);
+    if (balanceDue < 0) {
+      return `${absBalance}`;
+    } else if (balanceDue === 0) {
+      return `0`;
+    } else if (balanceDue > 0) {
+      return `0`;
+    }
+  };
+
   const balanceDisplay = formatBalance();
   const buttonState = getCobrarButtonState();
+  const balanceDisplayForPresetKey = formatBalanceForPresetKey();
 
   return (
     <div style={styles.container}>
       <div style={styles.titleBar}>
-        <button style={styles.cancelButton} onClick={handleCancel}>
-          Cancelar
-        </button>
-        <span style={styles.title}>Pagar Ticket ${totalDue.toFixed(2)}</span>
+        <div
+          style={{
+            width: "40%",
+            paddingLeft: "18px",
+            borderRight: "1px solid #ddd",
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            paddingRight: "12px",
+            cursor: "pointer",
+          }}
+          onClick={() => parseFloat(calculateTotal()) > 0 && resetAll()}
+        >
+          {parseFloat(calculateTotal()) > 0 && (
+            <RotateCcw style={{ marginLeft: "6px", height: "20px" }} />
+          )}{" "}
+        </div>
+        <div
+          style={{
+            width: "60%",
+            paddingRight: "18px",
+            position: "relative",
+          }}
+        >
+          <div style={styles.cancelButton} onClick={handleCancel}>
+            <SquareX />
+          </div>
+        </div>
       </div>
 
       <div style={styles.mainContent}>
@@ -232,20 +285,20 @@ const PaymentScreen = ({
               </div>
             </div>
             <div style={styles.breakdownItem}>
-              <span style={{ color: "gray" }}>DOLARES</span>
+              <span style={{ color: "black" }}>DOLARES</span>
               <div style={styles.amountContainer}>
-                <span style={{ color: "gray" }}>
+                <span style={{ color: "black" }}>
                   ${payments.DOLLARS.toFixed(2)}
                 </span>
                 <Eraser style={styles.eraserIcon} onClick={resetDollars} />
               </div>
             </div>
             <div style={styles.breakdownItem}>
-              <span style={{ color: "black" }}>
+              <span style={{ color: "gray" }}>
                 ↳1 DOLAR = {dollarToPesosRate} PESOS
               </span>
               <div style={styles.amountContainer}>
-                <span style={{ color: "black" }}>
+                <span style={{ color: "gray" }}>
                   ${(payments.DOLLARS * dollarToPesosRate).toFixed(2)}
                 </span>
                 <Eraser style={styles.eraserIcon} onClick={resetDollars} />
@@ -271,6 +324,24 @@ const PaymentScreen = ({
                 />
               </div>
             </div>
+            <hr style={styles.divider} />
+            <div style={styles.breakdownItem}>
+              <span style={{ color: "gray" }}>TOTAL</span>
+              <div style={styles.amountContainer}>
+                <span style={{ color: "gray" }}>${totalDue.toFixed(2)}</span>
+                <div style={{ width: "24px" }}></div>{" "}
+                {/* Placeholder for alignment */}
+              </div>
+            </div>
+            <div style={styles.breakdownItem}>
+              <span style={{ color: "gray" }}>TOTAL (DOLAR)</span>
+              <div style={styles.amountContainer}>
+                <span style={{ color: "gray" }}>
+                  ${(totalDue.toFixed(2) / dollarToPesosRate).toFixed(2)}
+                </span>
+                <div style={{ width: "24px" }}></div>
+              </div>
+            </div>
             <div style={styles.breakdownItem}>
               <span style={{ color: balanceDisplay.color, fontWeight: "bold" }}>
                 BALANCE
@@ -281,68 +352,9 @@ const PaymentScreen = ({
                 >
                   {balanceDisplay.text}
                 </span>
-                <Eraser style={styles.eraserIcon} onClick={resetAll} />
+                <div style={{ width: "24px" }}></div>
               </div>
             </div>
-          </div>
-
-          <div style={styles.paymentMethods}>
-            <button
-              style={
-                activeMethod === "CASH"
-                  ? { ...styles.paymentMethod, ...styles.selectedPaymentMethod }
-                  : styles.paymentMethod
-              }
-              onMouseDown={() => handleMouseDown("CASH")}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onClick={() => handlePaymentMethod("CASH")}
-            >
-              <CircleDollarSign style={styles.icon} />
-              <span>Pesos</span>
-            </button>
-            <button
-              style={
-                activeMethod === "DOLLARS"
-                  ? { ...styles.paymentMethod, ...styles.selectedPaymentMethod }
-                  : styles.paymentMethod
-              }
-              onMouseDown={() => handleMouseDown("DOLLARS")}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onClick={() => handlePaymentMethod("DOLLARS")}
-            >
-              <Banknote style={styles.icon} />
-              <span>Dolares</span>
-            </button>
-            <button
-              style={
-                activeMethod === "CARD"
-                  ? { ...styles.paymentMethod, ...styles.selectedPaymentMethod }
-                  : styles.paymentMethod
-              }
-              onMouseDown={() => handleMouseDown("CARD")}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onClick={() => handlePaymentMethod("CARD")}
-            >
-              <CreditCard style={styles.icon} />
-              <span>Tarjeta</span>
-            </button>
-            <button
-              style={
-                activeMethod === "OTHER"
-                  ? { ...styles.paymentMethod, ...styles.selectedPaymentMethod }
-                  : styles.paymentMethod
-              }
-              onMouseDown={() => handleMouseDown("OTHER")}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onClick={() => handlePaymentMethod("OTHER")}
-            >
-              <Wallet style={styles.icon} />
-              <span>Otros</span>
-            </button>
           </div>
 
           <button
@@ -362,6 +374,29 @@ const PaymentScreen = ({
             <span style={styles.tenderLabel}></span>
             <span style={styles.amount}>${paymentAmount}</span>
           </div>
+
+          {/* Updated toggle container with gray background */}
+          <div style={styles.toggleWrapper}>
+            <div
+              style={{ ...styles.slider, left: `${selectedIndex * 25}%` }}
+            ></div>
+            <div style={styles.toggleContainer}>
+              {paymentMethods.map((method) => (
+                <button
+                  key={method}
+                  style={{
+                    ...styles.toggleButton,
+                    color: selectedMethods[0] === method ? "white" : "#333",
+                  }}
+                  onClick={() => handlePaymentMethodToggle(method)}
+                >
+                  {paymentMethodsMap[method].icon}
+                  {paymentMethodsMap[method].label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div style={styles.keypad}>
             <button style={styles.key} onClick={() => handleNumberClick("7")}>
               7
@@ -400,10 +435,14 @@ const PaymentScreen = ({
               3
             </button>
             <button
-              style={styles.specialKey}
-              onClick={() => console.log("add")}
+              style={{
+                ...styles.specialKey,
+                backgroundColor: "black",
+                color: "white",
+              }}
+              onClick={handleAddPayment}
             >
-              add
+              Agregar
             </button>
             <button
               style={styles.zeroKey}
@@ -411,14 +450,14 @@ const PaymentScreen = ({
             >
               0
             </button>
-            <button style={styles.key} onClick={() => handleNumberClick(".")}>
+            <button style={styles.key} onClick={() => handleDecimal()}>
               .
             </button>
             <button
               style={styles.presetKeyExtended}
-              onClick={() => handlePresetAmount(totalDue.toFixed(2))}
+              onClick={() => handlePresetAmount(balanceDisplayForPresetKey)}
             >
-              ${totalDue.toFixed(2)}
+              ${balanceDisplayForPresetKey}
             </button>
             <button
               style={styles.presetKey}
@@ -478,9 +517,6 @@ const styles = {
   },
   titleBar: {
     display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "10px 20px",
     backgroundColor: "#fff",
     borderBottom: "1px solid #ddd",
     boxShadow: "0 0.2px 0.2px rgba(0, 0, 0, 0.1)",
@@ -490,15 +526,12 @@ const styles = {
     borderTopRightRadius: "10px",
   },
   cancelButton: {
-    padding: "8px 16px",
-    fontSize: "14px",
-    color: "#111",
-    fontWeight: "500",
-    backgroundColor: "transparent",
-    border: "none",
-    cursor: "pointer",
     position: "absolute",
-    right: "20px",
+    right: "18px",
+    top: "10px",
+    display: "flex",
+    gap: "4px",
+    cursor: "pointer",
   },
   title: {
     fontSize: "14px",
@@ -509,7 +542,7 @@ const styles = {
   leftSidebar: {
     width: "40%",
     padding: "18px",
-    paddingBottom: "18px",
+    paddingBottom: "16px",
     backgroundColor: "#f5f7fa",
     borderRight: "1px solid #ddd",
     display: "flex",
@@ -542,6 +575,8 @@ const styles = {
   keypadSection: {
     width: "60%",
     padding: "18px",
+    paddingTop: "14px",
+    paddingBottom: "16px",
     display: "flex",
     flexDirection: "column",
     flex: 1,
@@ -550,10 +585,10 @@ const styles = {
   paymentAmount: {
     display: "flex",
     justifyContent: "space-between",
-    padding: "8px",
+    padding: "6px",
     border: "2px solid black",
     borderRadius: "5px",
-    marginBottom: "16px",
+    marginBottom: "10px",
     fontSize: "18px",
   },
   tenderLabel: {
@@ -563,6 +598,7 @@ const styles = {
   amount: {
     fontSize: "24px",
     fontWeight: "bold",
+    paddingRight: "2px",
   },
   keypad: {
     display: "grid",
@@ -572,7 +608,7 @@ const styles = {
     flex: 1,
   },
   key: {
-    padding: "16px",
+    padding: "14px",
     fontSize: "16px",
     border: "1px solid #ddd",
     borderRadius: "5px",
@@ -619,18 +655,12 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
   },
-  presetAmounts: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: "10px",
-    flex: 0,
-  },
   presetKeyExtended: {
     gridColumn: "span 2",
     fontSize: "16px",
     border: "1px solid #ddd",
     borderRadius: "5px",
-    backgroundColor: "#fff",
+    backgroundColor: "#e0e0e0", // Changed from #fff to #e0e0e0
     cursor: "pointer",
     color: "#444",
     fontWeight: "550",
@@ -643,7 +673,7 @@ const styles = {
     fontSize: "16px",
     border: "1px solid #ddd",
     borderRadius: "5px",
-    backgroundColor: "#fff",
+    backgroundColor: "#e0e0e0", // Changed from #fff to #e0e0e0
     cursor: "pointer",
     color: "#444",
     fontWeight: "550",
@@ -652,34 +682,53 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
   },
-  paymentMethods: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, 1fr)",
-    gridTemplateRows: "repeat(2, 1fr)",
-    gap: "10px",
+  toggleWrapper: {
+    position: "relative",
+    backgroundColor: "#e0e0e0",
+    borderRadius: "5px",
+    padding: "2px",
+    marginBottom: "10px",
+    overflow: "hidden",
   },
-  paymentMethod: {
+  toggleContainer: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: "2px",
+    position: "relative",
+  },
+  slider: {
+    position: "absolute",
+    top: "2px",
+    left: "0",
+    width: "25%",
+    height: "calc(100% - 4px)",
+    backgroundColor: "black",
+    borderRadius: "5px",
+    transition: "left 0.3s",
+  },
+  toggleButton: {
+    flex: 1,
     padding: "10px",
     fontSize: "14px",
-    border: "1.5px solid #1e4d2b",
-    borderRadius: "5px",
-    backgroundColor: "#fff",
+    border: "none",
+    borderRadius: "3px",
+    backgroundColor: "transparent",
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
+    justifyContent: "center",
     gap: "5px",
     color: "#333",
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-    justifyContent: "center",
-    width: "100%",
+    transition: "color 0.2s",
+    zIndex: 1,
   },
-  selectedPaymentMethod: {
-    border: "1.5px solid #1e4d2b",
-    backgroundColor: "#e9ffdb",
+  activeToggle: {
+    backgroundColor: "black",
+    color: "white",
   },
   icon: {
     fontSize: "20px",
-    color: "#006600",
+    color: "inherit",
   },
   finalizeButton: {
     padding: "41.5px",
@@ -697,6 +746,11 @@ const styles = {
     backgroundColor: "#cccccc",
     cursor: "not-allowed",
     opacity: "0.6",
+  },
+  divider: {
+    border: 0,
+    borderTop: "1px solid #ddd",
+    margin: "10px 0",
   },
 };
 
