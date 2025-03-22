@@ -1,10 +1,17 @@
 import React from "react";
-import { Plus, MoreHorizontal, Minus, X, Trash2 } from "lucide-react";
+import {
+  Plus,
+  MoreHorizontal,
+  Minus,
+  X,
+  Trash2,
+  RotateCcw,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useRef } from "react";
 import useGlobalStore from "@/hooks/useGlobalStore";
-import PaymentModal from "@/screens/PaymentScreen/modal";
+import Modal from "@/components/modal";
 import PaymentScreen from "@/screens/PaymentScreen/payment-screen";
 
 export function SalesBar() {
@@ -12,6 +19,8 @@ export function SalesBar() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const tabsListRef = useRef(null);
+
+  const dollarToPesosRate = 20;
 
   const cartItems = useGlobalStore((state) => state.cartItems);
   const removeItem = useGlobalStore((state) => state.removeItem);
@@ -234,12 +243,24 @@ export function SalesBar() {
               <div>Impuestos</div>
               <div className="font-bold text-right">${taxes.toFixed(2)}</div>
             </div>
+
+            <div className="flex justify-between items-center text-muted-foreground text-sm min-h-8">
+              <div>Total (PESOS)</div>
+              <div className="font-bold text-right">${total.toFixed(2)}</div>
+            </div>
+
+            <div className="flex justify-between items-center text-muted-foreground text-sm min-h-8">
+              <div>Total (DOLAR)</div>
+              <div className="font-bold text-right">
+                ${(total.toFixed(2) / dollarToPesosRate).toFixed(2)}
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2 w-full">
+          <div className="flex flex-col gap-[8px] w-full">
             <Button
               onClick={() => setIsPaymentModalOpen(true)}
-              className="flex justify-between items-center bg-black text-white hover:bg-black/70 h-14"
+              className="flex justify-between items-center bg-black text-white hover:bg-black/70 h-16"
             >
               <div className="text-xl">Pagar</div>
               <div className="text-xl font-bold text-right">
@@ -251,12 +272,18 @@ export function SalesBar() {
               className="flex justify-between items-center h-10"
               onClick={clearCart}
             >
-              <div className="text-lg">Limpiar</div>
+              <div
+                className="text-lg"
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                Deshacer ticket
+                <RotateCcw style={{ marginLeft: "6px" }} />
+              </div>
             </Button>
           </div>
         </div>
       </div>
-      <PaymentModal
+      <Modal
         handleClose={() => setIsPaymentModalOpen(false)}
         isOpen={isPaymentModalOpen}
         style={{ borderRadius: "100px" }}
@@ -264,9 +291,10 @@ export function SalesBar() {
         <PaymentScreen
           handleClose={() => setIsPaymentModalOpen(false)}
           totalDue={total}
+          dollarToPesosRate={dollarToPesosRate}
           style={{ borderRadius: "100px" }}
         />
-      </PaymentModal>
+      </Modal>
     </>
   );
 }

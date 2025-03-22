@@ -12,9 +12,16 @@
   padding-bottom: 10px;
 }
 
-.modal-content {
+.modal-content-large {
   width: 90%;
   height: 90%;
+  background-color: white;
+  color: black;
+}
+
+.modal-content-small {
+  width: 25%;
+  height: 25%;
   background-color: white;
   color: black;
 }
