@@ -12,12 +12,17 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useRef } from "react";
 import useGlobalStore from "@/hooks/useGlobalStore";
 import Modal from "@/components/modal";
-import PaymentScreen from "@/screens/PaymentScreen/payment-screen";
+import PaymentScreen from "@/screens/payment-screen";
+import PaymentCompletionScreen from "@/screens/payment-completion-screen";
+import { sha256 } from "js-sha256";
+import { useDatabase } from "@/services/db";
 
 export function SalesBar() {
   const [selectedTicket, setSelectedTicket] = useState("ticket1");
   const [selectedItem, setSelectedItem] = useState(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState(null);
   const tabsListRef = useRef(null);
 
   const dollarToPesosRate = 20;
@@ -69,6 +74,12 @@ export function SalesBar() {
   };
 
   const { subtotal, taxes, total } = calculateTotals();
+
+  const handlePaymentComplete = (details) => {
+    setPaymentDetails(details);
+    setIsCompletionModalOpen(true);
+    setIsPaymentModalOpen(false);
+  };
 
   return (
     <>
@@ -283,6 +294,7 @@ export function SalesBar() {
           </div>
         </div>
       </div>
+      {/* Payment modal */}
       <Modal
         handleClose={() => setIsPaymentModalOpen(false)}
         isOpen={isPaymentModalOpen}
@@ -290,9 +302,22 @@ export function SalesBar() {
       >
         <PaymentScreen
           handleClose={() => setIsPaymentModalOpen(false)}
+          handlePaymentComplete={handlePaymentComplete}
           totalDue={total}
           dollarToPesosRate={dollarToPesosRate}
           style={{ borderRadius: "100px" }}
+        />
+      </Modal>
+
+      {/* Completion modal - shown on top of SalesBar after payment is complete */}
+      <Modal
+        handleClose={() => setIsCompletionModalOpen(false)}
+        isOpen={isCompletionModalOpen}
+        type="small"
+      >
+        <PaymentCompletionScreen
+          handleClose={() => setIsCompletionModalOpen(false)}
+          paymentDetails={paymentDetails}
         />
       </Modal>
     </>

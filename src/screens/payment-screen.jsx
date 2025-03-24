@@ -1,29 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
-  DollarSign,
   CreditCard,
   Wallet,
   Banknote,
-  HandCoins,
   CircleDollarSign,
   Eraser,
-  ListRestart,
   SquareX,
-  X,
-  Trash,
-  Trash2,
   RotateCcw,
-  RotateCw,
-  RefreshCcw,
-  Undo,
-  Undo2,
-  History,
 } from "lucide-react";
+import PaymentCompletionScreen from "@/screens/payment-completion-screen";
 
 const PaymentScreen = ({
   totalDue = 0,
   dollarToPesosRate = 20,
   handleClose,
+  handlePaymentComplete,
 }) => {
   const [paymentAmount, setPaymentAmount] = useState("0");
   const [balanceDue, setBalanceDue] = useState(-Math.abs(totalDue));
@@ -42,6 +33,59 @@ const PaymentScreen = ({
     DOLLARS: { label: "DÓLAR", icon: <Banknote style={styles.icon} /> },
     CARD: { label: "TARJETA", icon: <CreditCard style={styles.icon} /> },
     OTHER: { label: "OTROS", icon: <Wallet style={styles.icon} /> },
+  };
+  const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState(null);
+  const clickTimeoutRef = useRef(null);
+  const clickCountRef = useRef(0);
+
+  // Update the handleFinalizePayment function to show the completion modal
+  const handleFinalizePayment = () => {
+    const buttonState = getCobrarButtonState();
+    // Calculate the payment details
+    const details = {
+      totalPaid: parseFloat(calculateTotal()),
+      change: parseFloat(balanceDue) > 0 ? parseFloat(balanceDue) : 0,
+    };
+
+    // Call the parent's payment complete handler
+    if (handlePaymentComplete) {
+      handlePaymentComplete(details);
+    } else {
+      // Fallback if handlePaymentComplete is not provided
+      alert("Payment finalized successfully!");
+      handleClose();
+    }
+
+    // Reset payment state
+    setPayments({ CASH: 0, DOLLARS: 0, CARD: 0, OTHER: 0 });
+    setBalanceDue(-Math.abs(totalDue));
+    setPaymentAmount("0");
+    setSelectedMethods(["CASH"]); // Reset to default method (Pesos)
+    setIsNewEntry(true);
+  };
+
+  const handleExtendedPresetKeyInteraction = (amount) => {
+    // First, set the amount as normal
+    handlePresetAmount(amount);
+
+    // Setup for double-click detection
+    clickCountRef.current += 1;
+
+    // Clear any existing timeout for double-click detection
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+    }
+
+    // Set a new timeout to reset click count after 300ms
+    clickTimeoutRef.current = setTimeout(() => {
+      // If we reached 2 clicks (double-click), trigger finalize
+      if (clickCountRef.current >= 2) {
+        console.log("sup bitch");
+        handleFinalizePayment();
+      }
+      clickCountRef.current = 0;
+    }, 300);
   };
 
   const calculateTotal = () => {
@@ -192,18 +236,6 @@ const PaymentScreen = ({
     }
   }, [balanceDue]);
 
-  const handleFinalizePayment = () => {
-    const buttonState = getCobrarButtonState();
-    if (!buttonState.disabled) {
-      alert("Payment finalized successfully!");
-      setPayments({ CASH: 0, DOLLARS: 0, CARD: 0, OTHER: 0 });
-      setBalanceDue(-Math.abs(totalDue));
-      setPaymentAmount("0");
-      setSelectedMethods(["CASH"]); // Reset to default method (Pesos)
-      setIsNewEntry(true);
-    }
-  };
-
   const handleCancel = () => {
     setPaymentAmount("0");
     setPayments({ CASH: 0, DOLLARS: 0, CARD: 0, OTHER: 0 });
@@ -239,266 +271,281 @@ const PaymentScreen = ({
   const balanceDisplayForPresetKey = formatBalanceForPresetKey();
 
   return (
-    <div style={styles.container}>
-      <div style={styles.titleBar}>
-        <div
-          style={{
-            width: "40%",
-            paddingLeft: "18px",
-            borderRight: "1px solid #ddd",
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            paddingRight: "12px",
-            cursor: "pointer",
-          }}
-          onClick={() => parseFloat(calculateTotal()) > 0 && resetAll()}
-        >
-          {parseFloat(calculateTotal()) > 0 && (
-            <RotateCcw style={{ marginLeft: "6px", height: "20px" }} />
-          )}{" "}
-        </div>
-        <div
-          style={{
-            width: "60%",
-            paddingRight: "18px",
-            position: "relative",
-          }}
-        >
-          <div style={styles.cancelButton} onClick={handleCancel}>
-            <SquareX />
+    <>
+      <div style={styles.container}>
+        <div style={styles.titleBar}>
+          <div
+            style={{
+              width: "40%",
+              paddingLeft: "18px",
+              borderRight: "1px solid #ddd",
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              paddingRight: "12px",
+              cursor: "pointer",
+            }}
+            onClick={() => parseFloat(calculateTotal()) > 0 && resetAll()}
+          >
+            {parseFloat(calculateTotal()) > 0 && (
+              <RotateCcw style={{ marginLeft: "6px", height: "20px" }} />
+            )}{" "}
+          </div>
+          <div
+            style={{
+              width: "60%",
+              paddingRight: "18px",
+              position: "relative",
+            }}
+          >
+            <div style={styles.cancelButton} onClick={handleCancel}>
+              <SquareX />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div style={styles.mainContent}>
-        <div style={styles.leftSidebar}>
-          <div style={styles.breakdown}>
-            <div style={styles.breakdownItem}>
-              <span>PESOS</span>
-              <div style={styles.amountContainer}>
-                <span>${payments.CASH.toFixed(2)}</span>
-                <Eraser
-                  style={styles.eraserIcon}
-                  onClick={() => resetPayment("CASH")}
-                />
+        <div style={styles.mainContent}>
+          <div style={styles.leftSidebar}>
+            <div style={styles.breakdown}>
+              <div style={styles.breakdownItem}>
+                <span>PESOS</span>
+                <div style={styles.amountContainer}>
+                  <span>${payments.CASH.toFixed(2)}</span>
+                  <Eraser
+                    style={styles.eraserIcon}
+                    onClick={() => resetPayment("CASH")}
+                  />
+                </div>
               </div>
-            </div>
-            <div style={styles.breakdownItem}>
-              <span style={{ color: "black" }}>DOLARES</span>
-              <div style={styles.amountContainer}>
-                <span style={{ color: "black" }}>
-                  ${payments.DOLLARS.toFixed(2)}
-                </span>
-                <Eraser style={styles.eraserIcon} onClick={resetDollars} />
+              <div style={styles.breakdownItem}>
+                <span style={{ color: "black" }}>DOLARES</span>
+                <div style={styles.amountContainer}>
+                  <span style={{ color: "black" }}>
+                    ${payments.DOLLARS.toFixed(2)}
+                  </span>
+                  <Eraser style={styles.eraserIcon} onClick={resetDollars} />
+                </div>
               </div>
-            </div>
-            <div style={styles.breakdownItem}>
-              <span style={{ color: "gray" }}>
-                ↳1 DOLAR = {dollarToPesosRate} PESOS
-              </span>
-              <div style={styles.amountContainer}>
+              <div style={styles.breakdownItem}>
                 <span style={{ color: "gray" }}>
-                  ${(payments.DOLLARS * dollarToPesosRate).toFixed(2)}
+                  ↳1 DOLAR = {dollarToPesosRate} PESOS
                 </span>
-                <Eraser style={styles.eraserIcon} onClick={resetDollars} />
+                <div style={styles.amountContainer}>
+                  <span style={{ color: "gray" }}>
+                    ${(payments.DOLLARS * dollarToPesosRate).toFixed(2)}
+                  </span>
+                  <Eraser style={styles.eraserIcon} onClick={resetDollars} />
+                </div>
               </div>
-            </div>
-            <div style={styles.breakdownItem}>
-              <span>TARJETA</span>
-              <div style={styles.amountContainer}>
-                <span>${payments.CARD.toFixed(2)}</span>
-                <Eraser
-                  style={styles.eraserIcon}
-                  onClick={() => resetPayment("CARD")}
-                />
+              <div style={styles.breakdownItem}>
+                <span>TARJETA</span>
+                <div style={styles.amountContainer}>
+                  <span>${payments.CARD.toFixed(2)}</span>
+                  <Eraser
+                    style={styles.eraserIcon}
+                    onClick={() => resetPayment("CARD")}
+                  />
+                </div>
               </div>
-            </div>
-            <div style={styles.breakdownItem}>
-              <span>OTROS</span>
-              <div style={styles.amountContainer}>
-                <span>${payments.OTHER.toFixed(2)}</span>
-                <Eraser
-                  style={styles.eraserIcon}
-                  onClick={() => resetPayment("OTHER")}
-                />
+              <div style={styles.breakdownItem}>
+                <span>OTROS</span>
+                <div style={styles.amountContainer}>
+                  <span>${payments.OTHER.toFixed(2)}</span>
+                  <Eraser
+                    style={styles.eraserIcon}
+                    onClick={() => resetPayment("OTHER")}
+                  />
+                </div>
               </div>
-            </div>
-            <hr style={styles.divider} />
-            <div style={styles.breakdownItem}>
-              <span style={{ color: "gray" }}>TOTAL</span>
-              <div style={styles.amountContainer}>
-                <span style={{ color: "gray" }}>${totalDue.toFixed(2)}</span>
-                <div style={{ width: "24px" }}></div>{" "}
-                {/* Placeholder for alignment */}
+              <hr style={styles.divider} />
+              <div style={styles.breakdownItem}>
+                <span style={{ color: "gray" }}>TOTAL</span>
+                <div style={styles.amountContainer}>
+                  <span style={{ color: "gray" }}>${totalDue.toFixed(2)}</span>
+                  <div style={{ width: "24px" }}></div>{" "}
+                  {/* Placeholder for alignment */}
+                </div>
               </div>
-            </div>
-            <div style={styles.breakdownItem}>
-              <span style={{ color: "gray" }}>TOTAL (DOLAR)</span>
-              <div style={styles.amountContainer}>
-                <span style={{ color: "gray" }}>
-                  ${(totalDue.toFixed(2) / dollarToPesosRate).toFixed(2)}
-                </span>
-                <div style={{ width: "24px" }}></div>
+              <div style={styles.breakdownItem}>
+                <span style={{ color: "gray" }}>TOTAL (DOLAR)</span>
+                <div style={styles.amountContainer}>
+                  <span style={{ color: "gray" }}>
+                    ${(totalDue.toFixed(2) / dollarToPesosRate).toFixed(2)}
+                  </span>
+                  <div style={{ width: "24px" }}></div>
+                </div>
               </div>
-            </div>
-            <div style={styles.breakdownItem}>
-              <span style={{ color: balanceDisplay.color, fontWeight: "bold" }}>
-                BALANCE
-              </span>
-              <div style={styles.amountContainer}>
+              <div style={styles.breakdownItem}>
                 <span
                   style={{ color: balanceDisplay.color, fontWeight: "bold" }}
                 >
-                  {balanceDisplay.text}
+                  BALANCE
                 </span>
-                <div style={{ width: "24px" }}></div>
+                <div style={styles.amountContainer}>
+                  <span
+                    style={{ color: balanceDisplay.color, fontWeight: "bold" }}
+                  >
+                    {balanceDisplay.text}
+                  </span>
+                  <div style={{ width: "24px" }}></div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <button
-            style={{
-              ...styles.finalizeButton,
-              ...(buttonState.disabled ? styles.disabledButton : {}),
-            }}
-            onClick={handleFinalizePayment}
-            disabled={buttonState.disabled}
-          >
-            {buttonState.label}
-          </button>
-        </div>
-
-        <div style={styles.keypadSection}>
-          <div style={styles.paymentAmount}>
-            <span style={styles.tenderLabel}></span>
-            <span style={styles.amount}>${paymentAmount}</span>
-          </div>
-
-          {/* Updated toggle container with gray background */}
-          <div style={styles.toggleWrapper}>
-            <div
-              style={{ ...styles.slider, left: `${selectedIndex * 25}%` }}
-            ></div>
-            <div style={styles.toggleContainer}>
-              {paymentMethods.map((method) => (
-                <button
-                  key={method}
-                  style={{
-                    ...styles.toggleButton,
-                    color: selectedMethods[0] === method ? "white" : "#333",
-                  }}
-                  onClick={() => handlePaymentMethodToggle(method)}
-                >
-                  {paymentMethodsMap[method].icon}
-                  {paymentMethodsMap[method].label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div style={styles.keypad}>
-            <button style={styles.key} onClick={() => handleNumberClick("7")}>
-              7
-            </button>
-            <button style={styles.key} onClick={() => handleNumberClick("8")}>
-              8
-            </button>
-            <button style={styles.key} onClick={() => handleNumberClick("9")}>
-              9
-            </button>
-            <button style={styles.backspaceKey} onClick={handleBackspace}>
-              ⌫
-            </button>
-            <button style={styles.key} onClick={() => handleNumberClick("4")}>
-              4
-            </button>
-            <button style={styles.key} onClick={() => handleNumberClick("5")}>
-              5
-            </button>
-            <button style={styles.key} onClick={() => handleNumberClick("6")}>
-              6
-            </button>
-            <button
-              style={{ ...styles.specialKey, gridRow: "span 1" }}
-              onClick={handleClear}
-            >
-              C
-            </button>
-            <button style={styles.key} onClick={() => handleNumberClick("1")}>
-              1
-            </button>
-            <button style={styles.key} onClick={() => handleNumberClick("2")}>
-              2
-            </button>
-            <button style={styles.key} onClick={() => handleNumberClick("3")}>
-              3
-            </button>
             <button
               style={{
-                ...styles.specialKey,
-                backgroundColor: "black",
-                color: "white",
+                ...styles.finalizeButton,
+                ...(buttonState.disabled ? styles.disabledButton : {}),
               }}
-              onClick={handleAddPayment}
+              onClick={handleFinalizePayment}
+              disabled={buttonState.disabled}
             >
-              Agregar
+              {buttonState.label}
             </button>
-            <button
-              style={styles.zeroKey}
-              onClick={() => handleNumberClick("0")}
-            >
-              0
-            </button>
-            <button style={styles.key} onClick={() => handleDecimal()}>
-              .
-            </button>
-            <button
-              style={styles.presetKeyExtended}
-              onClick={() => handlePresetAmount(balanceDisplayForPresetKey)}
-            >
-              ${balanceDisplayForPresetKey}
-            </button>
-            <button
-              style={styles.presetKey}
-              onClick={() => handlePresetAmount("10.00")}
-            >
-              $10
-            </button>
-            <button
-              style={styles.presetKey}
-              onClick={() => handlePresetAmount("20.00")}
-            >
-              $20
-            </button>
-            <button
-              style={styles.presetKey}
-              onClick={() => handlePresetAmount("50.00")}
-            >
-              $50
-            </button>
-            <button
-              style={styles.presetKey}
-              onClick={() => handlePresetAmount("100.00")}
-            >
-              $100
-            </button>
-            <button
-              style={styles.presetKey}
-              onClick={() => handlePresetAmount("200.00")}
-            >
-              $200
-            </button>
-            <button
-              style={styles.presetKey}
-              onClick={() => handlePresetAmount("500.00")}
-            >
-              $500
-            </button>
+          </div>
+
+          <div style={styles.keypadSection}>
+            <div style={styles.paymentAmount}>
+              <span style={styles.tenderLabel}></span>
+              <span style={styles.amount}>${paymentAmount}</span>
+            </div>
+
+            {/* Updated toggle container with gray background */}
+            <div style={styles.toggleWrapper}>
+              <div
+                style={{ ...styles.slider, left: `${selectedIndex * 25}%` }}
+              ></div>
+              <div style={styles.toggleContainer}>
+                {paymentMethods.map((method) => (
+                  <button
+                    key={method}
+                    style={{
+                      ...styles.toggleButton,
+                      color: selectedMethods[0] === method ? "white" : "#333",
+                    }}
+                    onClick={() => handlePaymentMethodToggle(method)}
+                  >
+                    {paymentMethodsMap[method].icon}
+                    {paymentMethodsMap[method].label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={styles.keypad}>
+              <button style={styles.key} onClick={() => handleNumberClick("7")}>
+                7
+              </button>
+              <button style={styles.key} onClick={() => handleNumberClick("8")}>
+                8
+              </button>
+              <button style={styles.key} onClick={() => handleNumberClick("9")}>
+                9
+              </button>
+              <button style={styles.backspaceKey} onClick={handleBackspace}>
+                ⌫
+              </button>
+              <button style={styles.key} onClick={() => handleNumberClick("4")}>
+                4
+              </button>
+              <button style={styles.key} onClick={() => handleNumberClick("5")}>
+                5
+              </button>
+              <button style={styles.key} onClick={() => handleNumberClick("6")}>
+                6
+              </button>
+              <button
+                style={{ ...styles.specialKey, gridRow: "span 1" }}
+                onClick={handleClear}
+              >
+                C
+              </button>
+              <button style={styles.key} onClick={() => handleNumberClick("1")}>
+                1
+              </button>
+              <button style={styles.key} onClick={() => handleNumberClick("2")}>
+                2
+              </button>
+              <button style={styles.key} onClick={() => handleNumberClick("3")}>
+                3
+              </button>
+              <button
+                style={{
+                  ...styles.specialKey,
+                  backgroundColor: "black",
+                  color: "white",
+                }}
+                onClick={handleAddPayment}
+              >
+                Agregar
+              </button>
+              <button
+                style={styles.zeroKey}
+                onClick={() => handleNumberClick("0")}
+              >
+                0
+              </button>
+              <button style={styles.key} onClick={() => handleDecimal()}>
+                .
+              </button>
+              <button
+                style={styles.presetKeyExtended}
+                onClick={() =>
+                  handleExtendedPresetKeyInteraction(balanceDisplayForPresetKey)
+                }
+              >
+                ${balanceDisplayForPresetKey}
+              </button>
+              <button
+                style={styles.presetKey}
+                onClick={() => handlePresetAmount("10.00")}
+              >
+                $10
+              </button>
+              <button
+                style={styles.presetKey}
+                onClick={() => handlePresetAmount("20.00")}
+              >
+                $20
+              </button>
+              <button
+                style={styles.presetKey}
+                onClick={() => handlePresetAmount("50.00")}
+              >
+                $50
+              </button>
+              <button
+                style={styles.presetKey}
+                onClick={() => handlePresetAmount("100.00")}
+              >
+                $100
+              </button>
+              <button
+                style={styles.presetKey}
+                onClick={() => handlePresetAmount("200.00")}
+              >
+                $200
+              </button>
+              <button
+                style={styles.presetKey}
+                onClick={() => handlePresetAmount("500.00")}
+              >
+                $500
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      {/* Add the completion modal */}
+      <PaymentCompletionScreen
+        isOpen={isCompletionModalOpen}
+        handleClose={() => {
+          setIsCompletionModalOpen(false);
+          //handleClose(); // Close the payment screen too
+        }}
+        paymentDetails={paymentDetails}
+      />
+    </>
   );
 };
 
@@ -660,9 +707,9 @@ const styles = {
     fontSize: "16px",
     border: "1px solid #ddd",
     borderRadius: "5px",
-    backgroundColor: "#e0e0e0", // Changed from #fff to #e0e0e0
+    backgroundColor: "black", // Changed from #fff to #e0e0e0
     cursor: "pointer",
-    color: "#444",
+    color: "white",
     fontWeight: "550",
     height: "100%",
     display: "flex",
