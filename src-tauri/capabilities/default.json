@@ -2,7 +2,9 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     "opener:default",
@@ -18,7 +20,16 @@
     "core:window:deny-close",
     {
       "identifier": "opener:allow-open-path",
-      "allow": [{ "path": "$APPDATA" }, { "path": "$APPDATA/**" }]
-    }
+      "allow": [
+        {
+          "path": "$APPDATA"
+        },
+        {
+          "path": "$APPDATA/**"
+        }
+      ]
+    },
+    "fs:default",
+    "dialog:default"
   ]
 }

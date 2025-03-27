@@ -43,9 +43,26 @@ const PaymentScreen = ({
   const handleFinalizePayment = () => {
     const buttonState = getCobrarButtonState();
     // Calculate the payment details
+    /**
+     * @typedef {Object} PaymentDetails
+     * @property {number} totalPaid - Total amount paid
+     * @property {number} change - Change amount
+     * @property {number} dollarsPaid - Amount paid in dollars
+     * @property {number} pesosPaid - Amount paid in pesos
+     * @property {number} cardsPaid - Amount paid in cards
+     * @property {number} othersPaid - Amount paid in other methods
+     */
+
+    /**
+     * @type {PaymentDetails}
+     */
     const details = {
       totalPaid: parseFloat(calculateTotal()),
       change: parseFloat(balanceDue) > 0 ? parseFloat(balanceDue) : 0,
+      dollarsPaid: payments.DOLLARS,
+      pesosPaid: payments.CASH,
+      cardsPaid: payments.CARD,
+      othersPaid: payments.OTHER,
     };
 
     // Call the parent's payment complete handler

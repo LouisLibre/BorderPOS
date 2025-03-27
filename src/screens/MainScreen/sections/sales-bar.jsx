@@ -24,6 +24,7 @@ export function SalesBar() {
   const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState(null);
   const tabsListRef = useRef(null);
+  const db = useDatabase();
 
   const dollarToPesosRate = 20;
 
@@ -75,10 +76,95 @@ export function SalesBar() {
 
   const { subtotal, taxes, total } = calculateTotals();
 
-  const handlePaymentComplete = (details) => {
+  const handlePaymentComplete = async (details) => {
     setPaymentDetails(details);
-    setIsCompletionModalOpen(true);
     setIsPaymentModalOpen(false);
+
+    // Record the sale and clear the cart
+    await recordSale(details);
+
+    // Show completion modal
+    setIsCompletionModalOpen(true);
+  };
+
+  const generateTicketId = (paymentMethod, totalAmount) => {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2);
+    const data = `${totalAmount}${paymentMethod}${timestamp}${random}`;
+    return sha256(data);
+  };
+
+  const generateTicketItemId = (ticketId, item) => {
+    const data = `${ticketId}${item.sku}${item.quantity}${item.price}`;
+    return sha256(data);
+  };
+
+  /**
+   *
+   * @param {paymentDetails} paymentDetails
+   */
+  const recordSale = async (paymentDetails) => {
+    try {
+      const sql = await db.getConnection();
+      const {
+        totalPaid,
+        change,
+        dollarsPaid,
+        pesosPaid,
+        cardsPaid,
+        othersPaid,
+      } = paymentDetails;
+      const paymentMethod = "CASH"; // Simplify for now
+
+      const ticketId = generateTicketId(paymentMethod, total);
+
+      const ticketQuery = `
+        INSERT INTO tickets (
+          id, subtotal, taxes, total_due, dollars_paid, pesos_paid, cards_paid, others_paid, total_paid, change, cashier_name, pos_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      await sql.execute(ticketQuery, [
+        ticketId,
+        subtotal,
+        taxes,
+        total,
+        dollarsPaid,
+        pesosPaid,
+        cardsPaid,
+        othersPaid,
+        totalPaid,
+        change,
+        "Cashier",
+        "POS1",
+      ]);
+
+      for (const item of cartItems) {
+        const itemId = generateTicketItemId(ticketId, item);
+        const itemTotal = item.price * (item.quantity || 1);
+        const itemQuery = `
+          INSERT INTO ticket_items (
+            id, ticket_id, line_item_sku, line_item_plu_code, line_item_barcode,
+            line_item_product_name, line_item_price, line_item_quantity, line_item_total
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        await sql.execute(itemQuery, [
+          itemId,
+          ticketId,
+          item.sku,
+          item.plu_code || null,
+          item.barcode || null,
+          item.product_name,
+          item.price,
+          item.quantity || 1,
+          itemTotal,
+        ]);
+      }
+
+      clearCart();
+    } catch (err) {
+      console.error("Error recording sale:", err.message);
+      throw err;
+    }
   };
 
   return (

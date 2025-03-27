@@ -5,7 +5,7 @@ import useGlobalStore from "@/hooks/useGlobalStore";
 
 const itemsPerPage = 12;
 
-export function Products() {
+export function Products({ refreshKey }) {
   const [items, setItems] = useState([]);
   const db = useDatabase();
   const addItem = useGlobalStore((state) => state.addItem);
@@ -33,7 +33,7 @@ export function Products() {
 
   React.useEffect(() => {
     loadProducts();
-  }, []);
+  }, [refreshKey]);
 
   const handleProductClick = (item) => {
     addItem({ ...item, quantity: 1 });
