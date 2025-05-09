@@ -5,38 +5,11 @@ import useGlobalStore from "@/hooks/useGlobalStore";
 
 const itemsPerPage = 12;
 
-export function Products({ refreshKey }) {
-  const [items, setItems] = useState([]);
-  const db = useDatabase();
+export function Products({ items = [] }) {
   const addItem = useGlobalStore((state) => state.addItem);
 
-  const loadProducts = async () => {
-    try {
-      const sql = await db.getConnection();
-
-      const rows = await sql.select("SELECT * FROM products");
-      setItems(rows);
-      /*
-      [{
-      sku: "SKU-001", // <-- primary key
-      vendor_sku: "VENDOR-001",
-      product_name: "Test Product",
-      price: 100,
-      created_at: "2025-12-30 21:00:00",
-      updated_at: "2025-12-30 21:00:00",
-      },..]
-      */
-    } catch (err) {
-      console.error("Error querying products:", err.message);
-    }
-  };
-
-  React.useEffect(() => {
-    loadProducts();
-  }, [refreshKey]);
-
   const handleProductClick = (item) => {
-    addItem({ ...item, quantity: 1 });
+    addItem(item); // Default quantity is 1
   };
 
   // TODO: Implement an optional nickname for each product to avoid truncation, this is done by Square POS
@@ -46,7 +19,7 @@ export function Products({ refreshKey }) {
         <div className="grid grid-cols-4 gap-4 min-h-min">
           {items.map((item, index) => (
             <button
-              key={index}
+              key={item.sku}
               onClick={() => handleProductClick(item)}
               title={item.product_name}
               className={`aspect-square row-span-1 col-span-1 flex items-center justify-center px-2 py-1 text-sm border-2 rounded-lg hover:bg-accent overflow-hidden`}
