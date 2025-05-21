@@ -170,7 +170,7 @@ export function SalesBar() {
   return (
     <>
       <div className="h-full flex flex-col">
-        <div className="border-b p-2 h-14 flex items-center shrink-0">
+        <div className="border-b p-2 h-16 flex items-center shrink-0">
           <Tabs
             defaultValue="ticket1"
             className="flex-1 min-w-0"
@@ -366,7 +366,7 @@ export function SalesBar() {
             </Button>
             <Button
               variant="outline"
-              className="flex justify-between items-center h-10"
+              className="flex justify-between items-center h-12"
               onClick={clearCart}
             >
               <div

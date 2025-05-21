@@ -5,7 +5,7 @@ import { SalesBar } from "./sections/sales-bar";
 import { useDatabase } from "@/services/db";
 import useGlobalStore from "@/hooks/useGlobalStore";
 
-function MainScreen({ refreshKey, importError }) {
+function MainScreen({ refreshKey, importError, toggleDrawer }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [allItems, setAllItems] = useState([]);
 
@@ -104,19 +104,44 @@ function MainScreen({ refreshKey, importError }) {
   );
 
   return (
-    <div className="flex h-screen w-full bg-background">
-      <div className="flex flex-col w-[63%] border-r">
-        <SearchBar
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          onSearchSubmit={handleSearchSubmit}
-        />
-        <Products items={filteredItems} />
+    <>
+      <div className="flex h-screen w-full bg-background">
+        <div className="flex flex-col w-[63%] border-r">
+          <div className="flex flex-row border-b p-2 h-16">
+            {/* Hamburger Icon */}
+            <div
+              className="flex items-center justify-center w-10 h-10 bg-background rounded-full cursor-pointer pl-2 mr-2 pt-[6.5px]"
+              onClick={toggleDrawer}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-9 w-9"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="rgb(60,60,60)"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </div>
+            {/* Search Bar */}
+            <SearchBar
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              onSearchSubmit={handleSearchSubmit}
+            />
+          </div>
+          <Products items={filteredItems} />
+        </div>
+        <div className="w-[37%]">
+          <SalesBar />
+        </div>
       </div>
-      <div className="w-[37%]">
-        <SalesBar />
-      </div>
-    </div>
+    </>
   );
 }
 

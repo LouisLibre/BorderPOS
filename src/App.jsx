@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from "react";
-import MainScreen from "@/screens/MainScreen/MainScreen";
 import "@/assets/global.css";
 import { useDatabase } from "@/services/db";
 import { listen } from "@tauri-apps/api/event";
+import { Route, Switch, Redirect, Link } from "wouter";
+import Drawer from "react-modern-drawer";
+import "react-modern-drawer/dist/index.css";
+
+import MainScreen from "@/screens/main-screen/main-screen";
+import SalesScreen from "@/screens/sales-screen";
+import ConfigScreen from "@/screens/config-screen";
 
 // Wrapper component for the application,
 // which renders the MainScreen component and may include other global components
@@ -15,6 +21,11 @@ export default function App() {
   const [importError, setImportError] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const db = useDatabase();
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+  const toggleDrawer = () => {
+    setIsDrawerOpen((prevState) => !prevState);
+  };
+  const drawerDuration = isDrawerOpen ? 300 : 0;
 
   useEffect(() => {
     const unlisten = listen("import-csv-selected", (event) => {
@@ -91,7 +102,56 @@ export default function App() {
 
   return (
     <>
-      <MainScreen refreshKey={refreshKey} importError={importError} />
+      <Switch>
+        <Route path="/">
+          <MainScreen
+            refreshKey={refreshKey}
+            importError={importError}
+            toggleDrawer={toggleDrawer}
+          />
+        </Route>
+        <Route path="/sales">
+          <SalesScreen toggleDrawer={toggleDrawer} />
+        </Route>
+        <Route path="/config">
+          <ConfigScreen toggleDrawer={toggleDrawer} />
+        </Route>
+        <Route>
+          <Redirect to="/" />
+        </Route>
+      </Switch>
+      <Drawer
+        open={isDrawerOpen}
+        onClose={toggleDrawer}
+        direction="left"
+        enableOverlay={true}
+        duration={drawerDuration}
+        size={300}
+      >
+        <div className="flex flex-col">
+          <Link
+            href="/"
+            onClick={toggleDrawer}
+            className="w-full block py-2 text-gray-900 hover:bg-gray-200 pl-2"
+          >
+            Punto de Venta
+          </Link>
+          <Link
+            href="/sales"
+            onClick={toggleDrawer}
+            className="w-full block py-2 text-gray-900 hover:bg-gray-200 pl-2"
+          >
+            Listado de Ventas
+          </Link>
+          <Link
+            href="/config"
+            onClick={toggleDrawer}
+            className="w-full block py-2  text-gray-900 hover:bg-gray-200 pl-2"
+          >
+            Configuracion
+          </Link>
+        </div>
+      </Drawer>
     </>
   );
 }

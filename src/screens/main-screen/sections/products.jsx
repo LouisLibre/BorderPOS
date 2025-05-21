@@ -14,7 +14,7 @@ export function Products({ items = [] }) {
 
   // TODO: Implement an optional nickname for each product to avoid truncation, this is done by Square POS
   return (
-    <div className="p-4 flex-1 flex flex-col h-full overflow-y-auto">
+    <div className="p-4 flex-1 flex flex-col h-full overflow-y-auto pt-[10px]">
       <div className="flex-1">
         <div className="grid grid-cols-4 gap-4 min-h-min">
           {items.map((item, index) => (

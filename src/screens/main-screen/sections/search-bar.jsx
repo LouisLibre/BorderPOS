@@ -19,7 +19,7 @@ export function SearchBar({ searchTerm, setSearchTerm, onSearchSubmit }) {
   };
 
   return (
-    <div className="p-2 border-b h-14 flex items-center">
+    <div className="flex items-center flex-1 pr-2">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input

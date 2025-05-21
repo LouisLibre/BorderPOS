@@ -38,6 +38,13 @@ CREATE TABLE IF NOT EXISTS ticket_items (
     FOREIGN KEY (ticket_id) REFERENCES tickets(id)
 );
 
+CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value JSON NOT NULL DEFAULT '{}',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku);
 CREATE INDEX IF NOT EXISTS idx_tickets_created_at ON tickets(created_at);
 CREATE INDEX IF NOT EXISTS idx_ticket_items_ticket_id ON ticket_items(ticket_id);
+CREATE INDEX IF NOT EXISTS idx_settings_key ON settings(key);
