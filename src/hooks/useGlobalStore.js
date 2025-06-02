@@ -72,7 +72,7 @@ const useGlobalStore = create((set, get) => {
           return {
             cartItems: state.cartItems.map((i) =>
               i.sku === item.sku
-                ? { ...i, quantity: (i.quantity || 1) + parsedQuantity } // Use quantityToAdd // should be || 0 according to gemini mmm
+                ? { ...i, quantity: (i.quantity || 0) + parsedQuantity } // Use quantityToAdd // should be || 0 according to gemini mmm
                 : i
             ),
           };
@@ -97,7 +97,13 @@ const useGlobalStore = create((set, get) => {
         const newQuantity = Math.max(0, parsedQuantity);
         if (newQuantity === 0) {
           // If quantity becomes zero, remove the item
-          return { cartItems: state.cartItems.filter((i) => i.sku !== sku) };
+          //return { cartItems: state.cartItems.filter((i) => i.sku !== sku) };
+          console.log("Setting item to 0 with sku:", sku);
+          return {
+            cartItems: state.cartItems.map((item) =>
+              item.sku === sku ? { ...item, quantity: 0 } : item
+            ),
+          };
         } else {
           return {
             cartItems: state.cartItems.map((item) =>

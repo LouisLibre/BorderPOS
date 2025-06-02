@@ -23,6 +23,7 @@ export function SalesBar() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState(null);
+  const [inputQuantities, setInputQuantities] = useState({});
   const tabsListRef = useRef(null);
   const db = useDatabase();
 
@@ -223,18 +224,19 @@ export function SalesBar() {
               className="cursor-default"
             >
               <tr className="text-sm font-medium">
-                <th className="text-left px-2 pl-2.5 py-2 w-[40%]">Producto</th>
-                <th className="text-right px-2 py-2 w-[20%]">Cant</th>
-                <th className="text-right px-2 pr-2.5 py-2 w-[40%]">Monto</th>
+                <th className="text-left px-2 pl-2.5 py-2 w-[45%]">Producto</th>
+                <th className="text-center px-2 py-2 w-[27%]">Cant</th>
+                <th className="text-right px-2 pr-2.5 py-2 w-[28%]">Monto</th>
               </tr>
             </thead>
             <tbody>
               {cartItems.map((item, i) => (
                 <React.Fragment key={item.sku}>
                   <tr
-                    className={`hover:bg-accent/60 cursor-pointer ${
+                    className={`cursor-arrow ${
+                      // hover:bg-accent/60
                       selectedItem === i
-                        ? "bg-accent/60 hover:bg-accent/60"
+                        ? "" //"bg-accent/60 hover:bg-accent/60"
                         : ""
                     }`}
                     onClick={() =>
@@ -249,18 +251,74 @@ export function SalesBar() {
                     </td>
                     <td
                       style={{ verticalAlign: "top" }}
-                      className="text-right px-2 py-2"
+                      className="text-right px-0 py-2 flex"
                     >
-                      {item.quantity || 1}
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-10"
+                        onClick={() =>
+                          updateItemQuantity(item.sku, (item.quantity || 0) - 1)
+                        }
+                      >
+                        <Minus className="h-2 w-2" />
+                      </Button>
+                      <input
+                        type="text"
+                        value={
+                          inputQuantities[item.sku] !== undefined
+                            ? inputQuantities[item.sku]
+                            : item.quantity || 0
+                        }
+                        onChange={(e) => {
+                          //updateItemQuantity(item.sku, e.target.value)
+                          const value = e.target.value;
+                          setInputQuantities((prev) => ({
+                            ...prev,
+                            [item.sku]: value,
+                          }));
+                        }}
+                        onBlur={(e) => {
+                          const value = inputQuantities[item.sku];
+                          // Trim white spaces and replace comma with dot for decimal values
+                          const sanitizedValue = value.trim().replace(",", ".");
+                          const parsedQuantity = parseFloat(sanitizedValue);
+                          if (!isNaN(parsedQuantity) && parsedQuantity >= 0) {
+                            updateItemQuantity(item.sku, parsedQuantity);
+                          } else {
+                            // Handle invalid input as needed
+                            // For example, revert to previous valid quantity
+                          }
+                          // Clear the local input value
+                          setInputQuantities((prev) => {
+                            const newState = { ...prev };
+                            delete newState[item.sku];
+                            return newState;
+                          });
+                        }}
+                        className="w-full text-center border-1 h-8"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-10"
+                        onClick={() =>
+                          updateItemQuantity(item.sku, (item.quantity || 0) + 1)
+                        }
+                      >
+                        <Plus className="h-2 w-2" />
+                      </Button>
                     </td>
                     <td
                       style={{ verticalAlign: "top" }}
                       className="text-right px-2 pr-2.5 py-2"
                     >
-                      ${(item.price * (item.quantity || 1)).toFixed(2)}
+                      ${(item.price * (item.quantity || 0)).toFixed(2)}
                     </td>
                   </tr>
                   {selectedItem === i && (
+                    <>
+                      {/*
                     <tr className="bg-accent/60">
                       <td className="px-2 pl-2.5 py-2 overflow-hidden">
                         <div className="flex items-center gap-2 justify-start">
@@ -272,44 +330,10 @@ export function SalesBar() {
                             <MoreHorizontal className="h-2 w-4" />
                           </Button>
                           <span className="text-gray-600 text-sm">options</span>
-                        </div>
-                      </td>
-                      <td className="px-2 py-2 overflow-hidden">
-                        <div className="flex items-center gap-1 justify-end">
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-6 w-6"
-                            onClick={() =>
-                              updateItemQuantity(
-                                item.sku,
-                                (item.quantity || 1) - 1
-                              )
-                            }
-                          >
-                            <Minus className="h-2 w-2" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() =>
-                              updateItemQuantity(
-                                item.sku,
-                                (item.quantity || 1) + 1
-                              )
-                            }
-                          >
-                            <Plus className="h-2 w-2" />
-                          </Button>
-                        </div>
-                      </td>
-                      <td className="px-2 pr-2.5 py-2 ">
-                        <div className="flex items-center justify-end">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="ml-auto text-destructive w-6 h-6"
+                            className=" text-destructive w-6 h-6"
                             onClick={() => {
                               removeItem(item.sku);
                               setSelectedItem(null);
@@ -319,7 +343,15 @@ export function SalesBar() {
                           </Button>
                         </div>
                       </td>
+                      <td className="px-2 py-2 overflow-hidden">
+                        <div className="flex items-center gap-1 justify-end"></div>
+                      </td>
+                      <td className="px-2 pr-2.5 py-2 ">
+                        <div className="flex items-center justify-end"></div>
+                      </td>
                     </tr>
+                      */}
+                    </>
                   )}
                 </React.Fragment>
               ))}

@@ -10,6 +10,9 @@ use serde::{Serialize};
 use std::error::Error;
 use std::time::Duration;
 use rusb;
+//use tinyfiledialogs as tfd;
+use tfd;
+const CORRECT_IMPORT_PASSWORD: &str = "harina123"; // CHANGE THIS!
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -170,6 +173,30 @@ pub fn run() {
                 }
 
                 if event.id() == import_csv.id() {
+                  println!("'Import CSV' clicked. Requesting password via tfd.");
+
+                  let password_input = tfd::InputBox::new("Password Required", "Please enter the password for CSV import:")
+                        .password(true)
+                        .run_modal(); // Corrected to use run_modal()
+
+                  // Guard Clause 1: User cancelled password input
+                  let entered_password = match password_input {
+                      Some(p) => p, // Continues at Indent Level 2
+                      None => {     // Indent Level 3 for this block
+                          println!("Password input cancelled by user.");
+                          return; // Exit this event handling
+                      }
+                  }; // `entered_password` is now available, code flow continues at Indent Level 2
+
+                  // Guard Clause 2: Incorrect password
+                  if entered_password != CORRECT_IMPORT_PASSWORD { // Indent Level 2
+                      println!("Incorrect password entered.");
+                      tfd::MessageBox::new("Import Error", "Incorrect Password")
+                          .with_icon(tfd::MessageBoxIcon::Warning)
+                          .run_modal();
+                      return; // Exit this event handling
+                  }
+
                   let app_handle_clone = app_handle.clone();
                   app_handle.dialog()
                       .file()
@@ -192,8 +219,8 @@ pub fn run() {
                               println!("No CSV file selected");
                           }
                       });
-                  }
 
+                }
             });
 
             Ok(())

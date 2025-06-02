@@ -5,6 +5,7 @@ import { useDatabase } from "@/services/db";
 
 export default function ConfigScreen({ toggleDrawer }) {
   const [printers, setPrinters] = React.useState([]);
+  const [exchangeRate, setExchangeRate] = React.useState(0);
 
   const setCurrentPrinter = useGlobalStore((state) => state.setCurrentPrinter);
   const currentPrinter = useGlobalStore((state) => state.currentPrinter);
@@ -106,13 +107,17 @@ export default function ConfigScreen({ toggleDrawer }) {
             Configuración
           </div>
         </div>
-        <div className="flex flex-1 py-2 pl-[18px] bg-gray-50">
-          {/* Printer Selection: Printer Label then dropwdown with printers */}
-          <div className="flex flex-1">
-            <div className="text-xl mr-3">Impresora</div>
-            <div className="text-lg w-100">
+        {/* Changed: Applied p-4 for consistent padding around the settings content */}
+        <div className="flex flex-col space-y-4 flex-1 p-4 bg-gray-50">
+          {/* Printer Selection Row */}
+          <div className="flex items-center">
+            {/* Changed: Applied fixed width (w-72) and consistent margin (mr-4). shrink-0 prevents the label from shrinking. */}
+            <div className="text-xl mr-4 w-60 shrink-0">Impresora</div>
+            <div className="text-lg flex-1">
+              {" "}
+              {/* flex-1 allows the input wrapper to take remaining space */}
               <select
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="bg-gray-50 border h-10 border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 onChange={handlePrinterSelect}
                 value={
                   currentPrinter
@@ -138,6 +143,25 @@ export default function ConfigScreen({ toggleDrawer }) {
                   </option>
                 )}
               </select>
+            </div>
+          </div>
+
+          {/* Exchange Rate Row */}
+          <div className="flex items-center">
+            {/* Changed: Applied fixed width (w-72) and consistent margin (mr-4). shrink-0 prevents the label from shrinking. */}
+            <div className="text-xl mr-4 w-60 shrink-0">
+              Exchange Rate USD/MXN
+            </div>
+            <div className="text-lg flex-1">
+              {" "}
+              {/* flex-1 allows the input wrapper to take remaining space */}
+              <input
+                className="bg-gray-50 h-10 border border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                type="text"
+                placeholder="Enter exchange rate"
+                value={exchangeRate}
+                onChange={(event) => setExchangeRate(event.target.value)}
+              />
             </div>
           </div>
         </div>

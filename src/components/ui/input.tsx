@@ -12,6 +12,9 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           className
         )}
         ref={ref}
+        autocapitalize="off"
+        autocorrect="off"
+        spellcheck="false"
         {...props}
       />
     );

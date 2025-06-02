@@ -106,7 +106,7 @@ function MainScreen({ refreshKey, importError, toggleDrawer }) {
   return (
     <>
       <div className="flex h-screen w-full bg-background">
-        <div className="flex flex-col w-[63%] border-r">
+        <div className="flex flex-col w-[60%] border-r">
           <div className="flex flex-row border-b p-2 h-16">
             {/* Hamburger Icon */}
             <div
@@ -137,7 +137,7 @@ function MainScreen({ refreshKey, importError, toggleDrawer }) {
           </div>
           <Products items={filteredItems} />
         </div>
-        <div className="w-[37%]">
+        <div className="w-[40%]">
           <SalesBar />
         </div>
       </div>

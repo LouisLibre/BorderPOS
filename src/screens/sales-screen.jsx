@@ -247,11 +247,17 @@ export default function SalesScreen({ toggleDrawer }) {
         <pre>
           Tortilleria Sinaloa
           <br />
-          C/C No. 12345678
+          Ticked ID:{" "}
+          {currentTicket &&
+            Array.isArray(currentTicket) &&
+            currentTicket[0] &&
+            currentTicket[0].ticket_id.slice(0, 7)}
           <br />
-          Fecha: 2023-03-25
-          <br />
-          Total: $100
+          Fecha:{" "}
+          {currentTicket &&
+            Array.isArray(currentTicket) &&
+            currentTicket[0] &&
+            currentTicket[0].snapshot_created_at}
           <br />
           <br />
           {currentTicket &&
@@ -261,10 +267,22 @@ export default function SalesScreen({ toggleDrawer }) {
                 <br />
                 {item.line_item_quantity}
                 <br />${item.line_item_price}
+                <br />${item.line_item_total}
                 <br />
                 <br />
               </div>
             ))}
+          Total: $
+          {currentTicket &&
+            currentTicket
+              .reduce((sum, item) => {
+                const itemTotal = item.line_item_total
+                  ? parseFloat(item.line_item_total)
+                  : parseFloat(item.line_item_price) *
+                    parseFloat(item.line_item_quantity);
+                return sum + (isNaN(itemTotal) ? 0 : itemTotal);
+              }, 0)
+              .toFixed(2)}
         </pre>
       </TicketModal>
     </>
