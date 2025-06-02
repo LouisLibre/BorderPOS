@@ -1,0 +1,175 @@
+Categoría,Código,Producto,Precio Venta
+Tortilla (10),1001,Tortilla Blanca,75
+Tortilla (10),1002,Tortilla Mantequilla 1 paquete,75
+Tortilla (10),1003,Tortilla Chipotle 1/2 paquete,45
+Tortilla (10),1004,Toritlla Taco,45
+Tortilla (10),1005,Toritlla Integral,75
+Tortilla (10),1006,Tortilla Integral con azúcar,75
+Tortilla (10),1007,Tortilla Integral Chica,46
+Tortilla (10),1008,Tortilla Burro,65
+Tortilla (10),1009,Tortilla Maiz 1K,30
+Tortilla (10),1010,Tortilla Maiz 1/2K,16
+Tortilla (10),1011,Tortilla Taco Maiz,36
+Tortilla (10),1012,Tortilla Flautas,36
+Productos caseros (11),1101,Frijoles de la olla,25
+Productos caseros (11),1102,Frijoles de la olla 1L,35
+Productos caseros (11),1103,Frijoles puercos,45
+Productos caseros (11),1104,Frijoles refritos,30
+Productos caseros (11),1105,Frijoles premium,55
+Productos caseros (11),1106,Masa,30
+Productos caseros (11),1107,Nixtamal,30
+Productos caseros (11),1108,Sopes,34
+Productos caseros (11),1109,Tamales de Carne,35
+Productos caseros (11),1110,Tamales de Elote,38
+Productos caseros (11),1111,Tamales de Pollo,35
+Productos caseros (11),1112,Tamales Rajas,35
+Productos caseros (11),1113,Tamales Variedad,35
+Productos caseros (11),1114,Totopos,40
+Panaderia (12),1201,Alfajor,29
+Panaderia (12),1202,Cochitos,18
+Panaderia (12),1203,Coricos Adela,30
+Panaderia (12),1204,Coricos Adela bolita,30
+Panaderia (12),1205,Coricos Culiacan,42
+Panaderia (12),1206,Coricos Mario,27
+Panaderia (12),1207,Coyotas La Sinaloa,42
+Panaderia (12),1208,Coyotas Lulu,42
+Panaderia (12),1209,Domos coricos,48
+Panaderia (12),1210,Doraditas Culiacan,42
+Panaderia (12),1211,Empanada Antaño Cajeta,42
+Panaderia (12),1212,Empanada Antaño Fresa,42
+Panaderia (12),1213,Empanada Antaño Guayaba,42
+Panaderia (12),1214,Empanada Antaño Piña,42
+Panaderia (12),1215,Empanada Antaño Calabaza,42
+Panaderia (12),1216,Empanada Casera,14
+Panaderia (12),1217,Empanada Santa Cruz,12
+Panaderia (12),1218,Empanadas Culiacan,42
+Panaderia (12),1219,Empanadas Elvi,65
+Panaderia (12),1220,Empanadas rikas,18
+Panaderia (12),1221,Galleta Almanara (Arabe),30
+Panaderia (12),1222,Galleta Almanara,30
+Panaderia (12),1223,Galleta Vainilla,35
+Panaderia (12),1224,Gorditas Culiacan,45
+Panaderia (12),1225,Jamoncillo,6
+Panaderia (12),1226,Pastizetas mochis,45
+Cremeria (13),1301,Crema Flores,65
+Cremeria (13),1302,Crema Primavera,48
+Cremeria (13),1303,Jocoque Koki,110
+Cremeria (13),1304,Queso Adobero,280
+Cremeria (13),1305,Queso Adobero Ch,280
+Cremeria (13),1306,Queso Adobero Flores,220
+Cremeria (13),1307,Queso Cotija,200
+Cremeria (13),1308,Queso Cotija rayado,170
+Cremeria (13),1309,Queso Fresco Chico (300g),48
+Cremeria (13),1310,Queso Fresco Grande (460g),84
+Cremeria (13),1311,Queso Menonita Chico,98
+Cremeria (13),1312,Queso Menonita Grande,120
+Cremeria (13),1313,Queso Monterrey,220
+Cremeria (13),1314,Queso Oaxaca,200
+Cremeria (13),1315,Queso Oreado Guasave,170
+Cremeria (13),1316,Queso Panela,135
+Cremeria (13),1317,Requeson,92
+Carniceria (14),1401,Asientos (100g),45
+Carniceria (14),1402,Carne Seca 30 gr,58
+Carniceria (14),1403,Carne Seca 60 gr,100
+Carniceria (14),1404,Carne Seca 150 gr,230
+Carniceria (14),1405,Chicharron Granel,360
+Carniceria (14),1406,Chilorio Casero,80
+Carniceria (14),1407,Chilorio Lata 160g,80
+Carniceria (14),1408,Chilorio Lata 680g,246
+Carniceria (14),1409,Chilorio Rochin 250g,85
+Carniceria (14),1410,Chorizo,180
+Carniceria (14),1411,Chorizo de soya (250g),30
+Carniceria (14),1412,Machaca 100 gr,110
+Carniceria (14),1413,Machaca granel,740
+Carniceria (14),1414,Manteca 1kg,70
+Botanas (15),1501,Cacahuates Pico Machin,27
+Botanas (15),1502,Churros Pico Machin,27
+Botanas (15),1503,Chicharron Atotonilco Chico,35
+Botanas (15),1504,Chicharron Atotonilco Grande,48
+Botanas (15),1505,Chicharron Atotonilco Mini,25
+Botanas (15),1506,Chicharron Cuatrero Ch,35
+Botanas (15),1507,Chicharron Cuatrero Gd,56
+Botanas (15),1508,Chicharron Cuatrero Mini,25
+Botanas (15),1509,Tostadas Caseras Yaquesita,45
+Botanas (15),1510,Tostada Vequi Natural,45
+Botanas (15),1511,Tostadas Vequi Azul,45
+Abarrotes (16),1601,Chiles Gueros,30
+Abarrotes (16),1602,Chocolate Aborijen,130
+Abarrotes (16),1603,Miel,62
+Abarrotes (16),1604,Platanitos,38
+Abarrotes (16),1605,Polvo Cebada,50
+Abarrotes (16),1606,Polvo Champurrado,52
+Abarrotes (16),1607,Polvo Crema de Trigo,17
+Abarrotes (16),1608,Polvo Horchata,50
+Abarrotes (16),1609,Polvo Pinole de Flor,42
+Abarrotes (16),1610,Polvo Pinole,43
+Abarrotes (16),1611,Salsa 4 chiles,95
+Abarrotes (16),1612,Salsa Achil,140
+Abarrotes (16),1613,Salsa Algo Bien,38
+Abarrotes (16),1614,Salsa Cacahuate,38
+Abarrotes (16),1615,Salsa De Rojas,90
+Abarrotes (16),1616,Salsa Fuego,180
+Abarrotes (16),1617,Salsa Pico Machin,38
+Abarrotes (16),1618,Salsa Sazón,60
+Abarrotes (16),1619,Salsas Kary,30
+Abarrotes (16),1620,Tortimix con Nopal,40
+Cocina Platillos (17),1701,Albondigas,95
+Cocina Platillos (17),1702,Bistec Ranchero,140
+Cocina Platillos (17),1703,Caldo de Res,160
+Cocina Platillos (17),1704,Carne En Su Jugo,110
+Cocina Platillos (17),1705,Chicharron salsa verde,70
+Cocina Platillos (17),1706,Chiles Rellenos,80
+Cocina Platillos (17),1707,Cochinita Pibil,128
+Cocina Platillos (17),1708,Enchiladas Rojas,80
+Cocina Platillos (17),1709,Enchiladas Verdes,80
+Cocina Platillos (17),1710,Flauta para dorar,75
+Cocina Platillos (17),1711,Menudo,130
+Cocina Platillos (17),1712,Mole con Pollo,75
+Cocina Platillos (17),1713,Pollo en pasta chipotle,30
+Cocina Platillos (17),1714,Pozole,110
+Cocina Platillos (17),1715,Salpicon,95
+Cocina Platillos (17),1716,Sopes Preparados,80
+Cocina Guarnición (18),1801,Arroz con Leche,30
+Cocina Guarnición (18),1802,Arroz Rojo,30
+Cocina Guarnición (18),1803,Cebolla Curtida,15
+Cocina Guarnición (18),1804,Ensalada Nopales,28
+Cocina Guarnición (18),1805,Espagueti Chipotle,48
+Cocina Guarnición (18),1806,Espagueti Rojo,48
+Cocina Guarnición (18),1807,Espagueti Verde,48
+Cocina Guarnición (18),1808,Flan,45
+Cocina Guarnición (18),1809,Gelatina,30
+Cocina Guarnición (18),1810,Nopales en Escabeche,35
+Cocina Guarnición (18),1811,Nopales natural,30
+Cocina Guarnición (18),1812,Rajas con Crema,55
+Cocina Guarnición (18),1813,Sopa de Fideo,35
+Cocina Guarnición (18),1814,Sopa Fria,48
+Burritos (19),1901,Burritos normales,35
+Burritos (19),1902,Burritos especiales,45
+Temporada (20),2001,Bueñuelitos,30
+Temporada (20),2002,Bueñuelos precocidos,75
+Temporada (20),2003,Buñuelos azucarados,55
+Temporada (20),2004,Buñuelos Miel Massy grande,90
+Temporada (20),2005,Buñuelos Miel Massy mini,55
+Temporada (20),2006,Buñuelos Nuez Herly,140
+Temporada (20),2007,Capirotada chica,65
+Temporada (20),2008,Capirotada grande,110
+Temporada (20),2009,Hoja para tamal,90
+Temporada (20),2010,Hoja para tamal grande,180
+Bebidas (21),2101,Ciel Agua 1L Natural,14
+Bebidas (21),2102,Ciel Agua 1L Jamaica,14
+Bebidas (21),2103,Ciel Agua 600ml,12
+Bebidas (21),2104,Coca Vidrio 235ml,12
+Bebidas (21),2105,Refresco Lata 355ml,17
+Bebidas (21),2106,Ciel Mineralizada 600ml,23
+Bebidas (21),2107,Refresco PET 600ml,23
+Bebidas (21),2108,Del Valle 600ml,23
+Bebidas (21),2109,TopoChico 600ml,23
+Bebidas (21),2110,Fuze Tea,23
+Bebidas (21),2111,Powerade,23
+Bebidas (21),2112,Jugo del Valle Vidrio,18
+Bebidas (21),2113,Leche Santa Clara,14
+Bebidas (21),2114,Valle Fruit 1 Lt,18
+Bebidas (21),2115,Monster,42
+Bebidas (21),2116,Refresco 2Lt,42
+Bebidas (21),2117,Ciel Mineralizada 2Lt,42
+Varios (22),2201,Bolsa,18
