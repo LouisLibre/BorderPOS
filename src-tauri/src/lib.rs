@@ -43,7 +43,7 @@ pub struct Ticket {
     pub dollars_paid: f32,
     pub cards_paid: f32,
     pub others_paid: f32,
-    pub monto_cambio: f32,
+    pub change_due: f32,
     pub total_due: f32,
 }
 

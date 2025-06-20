@@ -41,7 +41,7 @@ const PaymentCompletionScreen = ({ handleClose, paymentDetails }) => {
       dollars_paid: paymentDetails.dollarsPaid,
       cards_paid: paymentDetails.cardsPaid,
       others_paid: paymentDetails.othersPaid,
-      monto_cambio: paymentDetails.change,
+      change_due: paymentDetails.change,
       total_due: paymentDetails.totalDue,
       productos: paymentDetails.items.map((item) => ({
         nombre: item.product_name,
