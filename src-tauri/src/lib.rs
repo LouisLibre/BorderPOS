@@ -39,7 +39,7 @@ pub struct Ticket {
     pub folio: String,
     pub fecha: String,
     pub productos: Vec<TicketItem>,
-    pub monto_mxn: f32,
+    pub pesos_paid: f32,
     pub monto_usd: f32,
     pub monto_tarjeta: f32,
     pub monto_otros: f32,
