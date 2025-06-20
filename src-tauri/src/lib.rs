@@ -44,7 +44,7 @@ pub struct Ticket {
     pub monto_tarjeta: f32,
     pub monto_otros: f32,
     pub monto_cambio: f32,
-    pub monto_total: f32,
+    pub total_due: f32,
 }
 
 // folio

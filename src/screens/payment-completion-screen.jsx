@@ -42,7 +42,7 @@ const PaymentCompletionScreen = ({ handleClose, paymentDetails }) => {
       monto_tarjeta: paymentDetails.cardsPaid,
       monto_otros: paymentDetails.othersPaid,
       monto_cambio: paymentDetails.change,
-      monto_total: paymentDetails.totalDue,
+      total_due: paymentDetails.totalDue,
       productos: paymentDetails.items.map((item) => ({
         nombre: item.product_name,
         cantidad: parseFloat(item.quantity),
