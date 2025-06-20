@@ -34,7 +34,6 @@ const PaymentScreen = ({
     CARD: { label: "TARJETA", icon: <CreditCard style={styles.icon} /> },
     OTHER: { label: "OTROS", icon: <Wallet style={styles.icon} /> },
   };
-  const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState(null);
   const clickTimeoutRef = useRef(null);
   const clickCountRef = useRef(0);
@@ -553,15 +552,6 @@ const PaymentScreen = ({
           </div>
         </div>
       </div>
-      {/* Add the completion modal */}
-      <PaymentCompletionScreen
-        isOpen={isCompletionModalOpen}
-        handleClose={() => {
-          setIsCompletionModalOpen(false);
-          //handleClose(); // Close the payment screen too
-        }}
-        paymentDetails={paymentDetails}
-      />
     </>
   );
 };

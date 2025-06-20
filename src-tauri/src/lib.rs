@@ -1,23 +1,22 @@
+use rusb;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use std::error::Error;
+use std::time::Duration;
 use tauri::{
     menu::{AboutMetadata, MenuBuilder, MenuItemBuilder, SubmenuBuilder},
-    Emitter, Manager,
+    AppHandle, Emitter, Manager,
 };
 use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_fs::FsExt;
 use tauri_plugin_opener::OpenerExt;
-use tauri_plugin_sql::{Builder, Migration, MigrationKind};
-use serde::{Serialize};
-use std::error::Error;
-use std::time::Duration;
-use rusb;
+use tauri_plugin_sql::{Builder, DbInstances, DbPool, Migration, MigrationKind};
 //use tinyfiledialogs as tfd;
+use sqlx::{pool, Pool, Row, Sqlite};
 use tfd;
 const CORRECT_IMPORT_PASSWORD: &str = "harina123"; // CHANGE THIS!
 
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! Desde Rust!", name)
-}
+mod usbdriver;
 
 #[derive(Serialize)]
 struct UsbDevice {
@@ -25,6 +24,46 @@ struct UsbDevice {
     pid: u16,
     manufacturer: String,
     product: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TicketItem {
+    pub nombre: String,
+    pub cantidad: f32,
+    pub precio: f32,
+    pub total: f32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Ticket {
+    pub folio: String,
+    pub fecha: String,
+    pub productos: Vec<TicketItem>,
+    pub monto_mxn: f32,
+    pub monto_usd: f32,
+    pub monto_tarjeta: f32,
+    pub monto_otros: f32,
+    pub monto_cambio: f32,
+    pub monto_total: f32,
+}
+
+// folio
+// fecha
+// productos
+// -> nombre
+// -> cantidad
+// -> precio
+// -> total
+// -> monto_mxn
+// -> monto_usd
+// -> monto_tarjeta
+// -> monto_otros
+// -> monto_cambio
+#[tauri::command]
+fn print_ticket(ticket_data: Ticket) -> String {
+    println!("Saving user's preferences {ticket_data:#?}");
+    //usbdriver::print_ticket(&ticket_data.folio)
+    "Printed successfully".to_string()
 }
 
 #[tauri::command]
@@ -92,7 +131,27 @@ fn get_printers() -> Result<Vec<UsbDevice>, String> {
     }
     Ok(devices_info)
 }
+async fn get_database_settings_table_password_key_value(
+    app_handle: &AppHandle,
+) -> Result<String, String> {
+    let instances = app_handle.state::<DbInstances>();
+    let instances = instances.0.read().await;
 
+    let target_db = "sqlite:pos_demo.db";
+    let db_pool = instances
+        .get(target_db)
+        .ok_or_else(|| format!("Database instance '{}' not found.", target_db))?;
+
+    let DbPool::Sqlite(pool) = db_pool;
+    let query = "SELECT value FROM settings WHERE key = 'admin_password'";
+    let result = sqlx::query(query)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let password: String = result.try_get("value").map_err(|e| e.to_string())?;
+    Ok(password)
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -134,7 +193,7 @@ pub fn run() {
                 // Add our custom quit item last
                 .item(&show_db_folder)
                 .item(&reload_app) // New "Reload" item
-                .item(&import_csv)  // New menu item
+                .item(&import_csv) // New menu item
                 .item(&custom_quit)
                 .build()?;
 
@@ -173,53 +232,80 @@ pub fn run() {
                 }
 
                 if event.id() == import_csv.id() {
-                  println!("'Import CSV' clicked. Requesting password via tfd.");
+                    println!("'Import CSV' clicked. Requesting password via tfd.");
 
-                  let password_input = tfd::InputBox::new("Password Required", "Please enter the password for CSV import:")
-                        .password(true)
-                        .run_modal(); // Corrected to use run_modal()
+                    // let import_Password =get_database_settings_table_password_key_value(&app_handle);
+                    let app_handle_clone = app_handle.clone();
+                    let password_result = tauri::async_runtime::block_on(
+                        get_database_settings_table_password_key_value(&app_handle_clone),
+                    );
 
-                  // Guard Clause 1: User cancelled password input
-                  let entered_password = match password_input {
-                      Some(p) => p, // Continues at Indent Level 2
-                      None => {     // Indent Level 3 for this block
-                          println!("Password input cancelled by user.");
-                          return; // Exit this event handling
-                      }
-                  }; // `entered_password` is now available, code flow continues at Indent Level 2
+                    let db_password = match password_result {
+                        Ok(pwd) => pwd,
+                        Err(e) => {
+                            eprintln!("Error retrieving password: {}", e);
+                            tfd::MessageBox::new("Import Error", "Failed to retrieve password")
+                                .with_icon(tfd::MessageBoxIcon::Error)
+                                .run_modal();
+                            return;
+                        }
+                    };
+                    println!("Password: {}", db_password);
 
-                  // Guard Clause 2: Incorrect password
-                  if entered_password != CORRECT_IMPORT_PASSWORD { // Indent Level 2
-                      println!("Incorrect password entered.");
-                      tfd::MessageBox::new("Import Error", "Incorrect Password")
-                          .with_icon(tfd::MessageBoxIcon::Warning)
-                          .run_modal();
-                      return; // Exit this event handling
-                  }
+                    let password_input = tfd::InputBox::new(
+                        "Password Required",
+                        "Please enter the password for CSV import:",
+                    )
+                    .password(true)
+                    .run_modal(); // Corrected to use run_modal()
 
-                  let app_handle_clone = app_handle.clone();
-                  app_handle.dialog()
-                      .file()
-                      .add_filter("CSV Files", &["csv"])
-                      .pick_file(move |file_path| {
-                          if let Some(path) = file_path {
-                              // Read the file content
-                              match app_handle_clone.fs().read_to_string(path.clone()) {
-                                  Ok(csv_content) => {
-                                      // Emit the CSV content to the frontend
-                                      let _ = app_handle_clone.emit("import-csv-selected", csv_content);
-                                      println!("CSV file selected: {:?}", path);
-                                  }
-                                  Err(e) => {
-                                      eprintln!("Failed to read CSV file: {}", e);
-                                      let _ = app_handle_clone.emit("import-csv-error", "Failed to read CSV file");
-                                  }
-                              }
-                          } else {
-                              println!("No CSV file selected");
-                          }
-                      });
+                    // Guard Clause 1: User cancelled password input
+                    let entered_password = match password_input {
+                        Some(p) => p, // Continues at Indent Level 2
+                        None => {
+                            // Indent Level 3 for this block
+                            println!("Password input cancelled by user.");
+                            return; // Exit this event handling
+                        }
+                    }; // `entered_password` is now available, code flow continues at Indent Level 2
 
+                    // Guard Clause 2: Incorrect password
+                    if entered_password != db_password {
+                        // Indent Level 2
+                        println!("Incorrect password entered.");
+                        println!("Password: {}", db_password);
+                        println!("Entered Password: {}", entered_password);
+                        tfd::MessageBox::new("Import Error", "Incorrect Password")
+                            .with_icon(tfd::MessageBoxIcon::Warning)
+                            .run_modal();
+                        return; // Exit this event handling
+                    }
+
+                    let app_handle_clone = app_handle.clone();
+                    app_handle
+                        .dialog()
+                        .file()
+                        .add_filter("CSV Files", &["csv"])
+                        .pick_file(move |file_path| {
+                            if let Some(path) = file_path {
+                                // Read the file content
+                                match app_handle_clone.fs().read_to_string(path.clone()) {
+                                    Ok(csv_content) => {
+                                        // Emit the CSV content to the frontend
+                                        let _ = app_handle_clone
+                                            .emit("import-csv-selected", csv_content);
+                                        println!("CSV file selected: {:?}", path);
+                                    }
+                                    Err(e) => {
+                                        eprintln!("Failed to read CSV file: {}", e);
+                                        let _ = app_handle_clone
+                                            .emit("import-csv-error", "Failed to read CSV file");
+                                    }
+                                }
+                            } else {
+                                println!("No CSV file selected");
+                            }
+                        });
                 }
             });
 
@@ -242,8 +328,7 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
-        .invoke_handler(tauri::generate_handler![get_printers])
+        .invoke_handler(tauri::generate_handler![get_printers, print_ticket])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

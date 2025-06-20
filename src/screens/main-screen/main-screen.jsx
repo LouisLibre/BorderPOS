@@ -94,6 +94,26 @@ function MainScreen({ refreshKey, importError, toggleDrawer }) {
       if (filteredItems.length > 0) {
         addItem(filteredItems[0], quantity);
         setSearchTerm(""); // Clear search bar
+        /*
+        A input text will be added to the DOM looking like this:
+        <input
+          id={`quantity-${item.sku}`}
+          type="text"...
+        */
+        // Todo: select that input text and focus it
+        setTimeout(() => {
+          let inputElement = document.getElementById(
+            `quantity-${filteredItems[0].sku}`
+          );
+          if (inputElement) {
+            inputElement.focus();
+          } else {
+            console.warn(
+              "Could not find input element with id quantity-item.sku",
+              filteredItems[0].sku
+            );
+          }
+        }, 100);
         return true;
       }
 
@@ -106,7 +126,7 @@ function MainScreen({ refreshKey, importError, toggleDrawer }) {
   return (
     <>
       <div className="flex h-screen w-full bg-background">
-        <div className="flex flex-col w-[60%] border-r">
+        <div className="flex flex-col w-[55%] border-r">
           <div className="flex flex-row border-b p-2 h-16">
             {/* Hamburger Icon */}
             <div
@@ -137,7 +157,7 @@ function MainScreen({ refreshKey, importError, toggleDrawer }) {
           </div>
           <Products items={filteredItems} />
         </div>
-        <div className="w-[40%]">
+        <div className="w-[45%]">
           <SalesBar />
         </div>
       </div>

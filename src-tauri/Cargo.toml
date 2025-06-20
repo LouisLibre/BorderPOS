@@ -26,5 +26,7 @@ tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 tauri-plugin-log = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
+escpos = { version = "0.15.2", features = ["full"] }
 rusb = "0.9.4" # Adjust version as needed
 tfd = "0.1.0"
+sqlx = { version = "0.8.3", features = ["runtime-tokio", "sqlite"] }

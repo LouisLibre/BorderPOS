@@ -23,6 +23,7 @@ export function SearchBar({ searchTerm, setSearchTerm, onSearchSubmit }) {
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
+          id="search-bar"
           placeholder="Buscar nombre de producto o código de barras"
           className="pl-10"
           value={searchTerm} // Control input value from parent state

@@ -5,6 +5,7 @@ import {
   Minus,
   X,
   Trash2,
+  Trash,
   RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -78,11 +79,24 @@ export function SalesBar() {
   const { subtotal, taxes, total } = calculateTotals();
 
   const handlePaymentComplete = async (details) => {
-    setPaymentDetails(details);
+    // can be derived from the payment details amounts
+    const paymentMethod = "CASH"; // Simplify for now
+    const { total } = calculateTotals();
+    console.log({ total });
+    const ticketId = generateTicketId(paymentMethod, total);
+
+    const fullPaymentDetails = {
+      ...details,
+      items: cartItems,
+      ticketId: ticketId,
+      totalDue: total,
+    };
+
+    setPaymentDetails(fullPaymentDetails);
     setIsPaymentModalOpen(false);
 
     // Record the sale and clear the cart
-    await recordSale(details);
+    await recordSale(ticketId, details);
 
     // Show completion modal
     setIsCompletionModalOpen(true);
@@ -104,7 +118,7 @@ export function SalesBar() {
    *
    * @param {paymentDetails} paymentDetails
    */
-  const recordSale = async (paymentDetails) => {
+  const recordSale = async (ticketId, paymentDetails) => {
     try {
       const sql = await db.getConnection();
       const {
@@ -115,9 +129,6 @@ export function SalesBar() {
         cardsPaid,
         othersPaid,
       } = paymentDetails;
-      const paymentMethod = "CASH"; // Simplify for now
-
-      const ticketId = generateTicketId(paymentMethod, total);
 
       const ticketQuery = `
         INSERT INTO tickets (
@@ -224,9 +235,10 @@ export function SalesBar() {
               className="cursor-default"
             >
               <tr className="text-sm font-medium">
-                <th className="text-left px-2 pl-2.5 py-2 w-[45%]">Producto</th>
-                <th className="text-center px-2 py-2 w-[27%]">Cant</th>
-                <th className="text-right px-2 pr-2.5 py-2 w-[28%]">Monto</th>
+                <th className="text-left px-2 pl-2.5 py-2 w-[40%]">Producto</th>
+                <th className="text-center px-2 py-2 w-[26%]">Cant</th>
+                <th className="text-right px-2 pr-2.5 py-2 w-[26%]">Monto</th>
+                <td className="text-right w-[7%]">&nbsp;</td>
               </tr>
             </thead>
             <tbody>
@@ -264,6 +276,7 @@ export function SalesBar() {
                         <Minus className="h-2 w-2" />
                       </Button>
                       <input
+                        id={`quantity-${item.sku}`}
                         type="text"
                         value={
                           inputQuantities[item.sku] !== undefined
@@ -296,6 +309,18 @@ export function SalesBar() {
                             return newState;
                           });
                         }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            // Blur the current input
+                            e.target.blur();
+                            // Focus the search bar
+                            const searchBar =
+                              document.getElementById("search-bar");
+                            if (searchBar) {
+                              searchBar.focus();
+                            }
+                          }
+                        }}
                         className="w-full text-center border-1 h-8"
                       />
                       <Button
@@ -310,10 +335,22 @@ export function SalesBar() {
                       </Button>
                     </td>
                     <td
-                      style={{ verticalAlign: "top" }}
+                      style={{ verticalAlign: "middle" }}
                       className="text-right px-2 pr-2.5 py-2"
                     >
                       ${(item.price * (item.quantity || 0)).toFixed(2)}
+                    </td>
+                    <td style={{ verticalAlign: "middle" }} className="mt-3">
+                      <Button
+                        variant="ghost"
+                        className="text-gray-600 w-4 h-6 hover:text-destructive"
+                        onClick={() => {
+                          removeItem(item.sku);
+                          setSelectedItem(null);
+                        }}
+                      >
+                        <Trash className="h-2 w-2" />
+                      </Button>
                     </td>
                   </tr>
                   {selectedItem === i && (
