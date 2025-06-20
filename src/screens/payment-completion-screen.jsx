@@ -39,7 +39,7 @@ const PaymentCompletionScreen = ({ handleClose, paymentDetails }) => {
         "",
       pesos_paid: paymentDetails.pesosPaid,
       dollars_paid: paymentDetails.dollarsPaid,
-      monto_tarjeta: paymentDetails.cardsPaid,
+      cards_paid: paymentDetails.cardsPaid,
       monto_otros: paymentDetails.othersPaid,
       monto_cambio: paymentDetails.change,
       total_due: paymentDetails.totalDue,

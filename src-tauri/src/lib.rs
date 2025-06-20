@@ -41,7 +41,7 @@ pub struct Ticket {
     pub productos: Vec<TicketItem>,
     pub pesos_paid: f32,
     pub dollars_paid: f32,
-    pub monto_tarjeta: f32,
+    pub cards_paid: f32,
     pub monto_otros: f32,
     pub monto_cambio: f32,
     pub total_due: f32,
