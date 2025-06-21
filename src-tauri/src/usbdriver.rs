@@ -1,3 +1,4 @@
+use crate::types::ticket;
 use escpos::driver::*;
 use escpos::errors::PrinterError;
 use escpos::printer::Printer;
@@ -43,7 +44,8 @@ fn format_sale_item(
 // usb driver address: vendor id, product id
 // model ticket data
 // figure out how to pass it into the function then worry about actually printing it
-pub fn print_ticket(ticket_id: &str) -> String {
+pub fn print_ticket(ticket_data: &ticket) -> String {
+    /*
     print!("Hello, {}! Desde Rust!", ticket_id);
     // We define an inner function or a closure that performs the printing.
     // This closure IS allowed to return a Result and use the `?` operator.
@@ -88,4 +90,6 @@ pub fn print_ticket(ticket_id: &str) -> String {
             format!("Printing failed: {}", e)
         }
     }
+    */
+    "Printed successfully".to_string()
 }

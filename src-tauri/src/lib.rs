@@ -16,7 +16,10 @@ use sqlx::{pool, Pool, Row, Sqlite};
 use tfd;
 const CORRECT_IMPORT_PASSWORD: &str = "harina123"; // CHANGE THIS!
 
-mod usbdriver;
+pub mod types;
+pub mod usbdriver;
+
+use types::ticket;
 
 #[derive(Serialize)]
 struct UsbDevice {
@@ -26,41 +29,8 @@ struct UsbDevice {
     product: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct TicketItem {
-    pub line_item_product_name: String,
-    pub line_item_quantity: f32,
-    pub line_item_price: f32,
-    pub line_item_total: f32,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Ticket {
-    pub id: String,
-    pub created_at: String,
-    pub pesos_paid: f32,
-    pub dollars_paid: f32,
-    pub cards_paid: f32,
-    pub others_paid: f32,
-    pub total_due: f32,
-    pub change: f32,
-    pub ticket_items: Vec<TicketItem>,
-}
-
-// folio
-// fecha
-// productos
-// -> nombre
-// -> cantidad
-// -> precio
-// -> total
-// -> monto_mxn
-// -> monto_usd
-// -> monto_tarjeta
-// -> monto_otros
-// -> monto_cambio
 #[tauri::command]
-fn print_ticket(ticket_data: Ticket) -> String {
+fn print_ticket(ticket_data: ticket) -> String {
     println!("Saving user's preferences {ticket_data:#?}");
     //usbdriver::print_ticket(&ticket_data.folio)
     "Printed successfully".to_string()
