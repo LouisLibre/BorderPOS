@@ -36,15 +36,15 @@ pub struct TicketItem {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Ticket {
-    pub folio: String,
-    pub fecha: String,
-    pub productos: Vec<TicketItem>,
+    pub id: String,
+    pub created_at: String,
     pub pesos_paid: f32,
     pub dollars_paid: f32,
     pub cards_paid: f32,
     pub others_paid: f32,
-    pub change_due: f32,
     pub total_due: f32,
+    pub change: f32,
+    pub ticket_items: Vec<TicketItem>,
 }
 
 // folio

@@ -31,8 +31,8 @@ const PaymentCompletionScreen = ({ handleClose, paymentDetails }) => {
             currentTicket[0].ticket_id.slice(0, 7)}
     */
     const ticketData = {
-      folio: paymentDetails.ticketId.slice(0, 7),
-      fecha:
+      id: paymentDetails.ticketId.slice(0, 7),
+      created_at:
         (Array.isArray(paymentDetails.items) &&
           paymentDetails.items[0] &&
           paymentDetails.items[0].created_at) ||
@@ -41,9 +41,9 @@ const PaymentCompletionScreen = ({ handleClose, paymentDetails }) => {
       dollars_paid: paymentDetails.dollarsPaid,
       cards_paid: paymentDetails.cardsPaid,
       others_paid: paymentDetails.othersPaid,
-      change_due: paymentDetails.change,
       total_due: paymentDetails.totalDue,
-      productos: paymentDetails.items.map((item) => ({
+      change: paymentDetails.change,
+      ticket_items: paymentDetails.items.map((item) => ({
         nombre: item.product_name,
         cantidad: parseFloat(item.quantity),
         precio: parseFloat(item.price),
