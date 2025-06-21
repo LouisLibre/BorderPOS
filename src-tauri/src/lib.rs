@@ -28,10 +28,10 @@ struct UsbDevice {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TicketItem {
-    pub nombre: String,
-    pub cantidad: f32,
-    pub precio: f32,
-    pub total: f32,
+    pub line_item_product_name: String,
+    pub line_item_quantity: f32,
+    pub line_item_price: f32,
+    pub line_item_total: f32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

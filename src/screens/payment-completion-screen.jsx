@@ -44,10 +44,11 @@ const PaymentCompletionScreen = ({ handleClose, paymentDetails }) => {
       total_due: paymentDetails.totalDue,
       change: paymentDetails.change,
       ticket_items: paymentDetails.items.map((item) => ({
-        nombre: item.product_name,
-        cantidad: parseFloat(item.quantity),
-        precio: parseFloat(item.price),
-        total: parseFloat(item.price) * parseFloat(item.quantity || 0),
+        line_item_product_name: item.product_name,
+        line_item_quantity: parseFloat(item.quantity),
+        line_item_price: parseFloat(item.price),
+        line_item_total:
+          parseFloat(item.price) * parseFloat(item.quantity || 0),
       })),
     };
     console.log({ ticketData });
