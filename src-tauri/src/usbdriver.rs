@@ -42,18 +42,16 @@ fn format_sale_item(
 }
 
 // usb driver address: vendor id, product id
-// model ticket data
-// figure out how to pass it into the function then worry about actually printing it
+// TODO: Agregarle el header ( nombre empresa, direccion, rfc ) desde la configuracion de la app
+// TODO: Pasar el vendor_id y product_id de la configuracion de la app
 pub fn print_ticket(ticket_data: &ticket) -> String {
-    /*
-    print!("Hello, {}! Desde Rust!", ticket_id);
     // We define an inner function or a closure that performs the printing.
     // This closure IS allowed to return a Result and use the `?` operator.
     let print_logic = || -> Result<(), PrinterError> {
         // All the code that can fail goes inside here.
         let driver = UsbDriver::open(0x1504, 0x006e, None)?;
         let mut printer = Printer::new(driver, Protocol::default(), None);
-        let print_msg = format!("Hello, {}! Desde Rust!", ticket_id);
+        let print_msg = format!("Hello, {}! Desde Rust!", ticket_data.id);
         println!("This got executed");
 
         printer
@@ -61,13 +59,17 @@ pub fn print_ticket(ticket_data: &ticket) -> String {
             .debug_mode(Some(DebugMode::Dec))
             .justify(JustifyMode::CENTER)?
             .bold(true)?
-            .writeln(print_msg.as_str())? // The `?` works here!
+            .writeln("Tortilleria y Productos")? // TODO: Make this dynamic
+            .writeln("Sinaloa")? // TODO: Make this dynamic
+            .feed()?
+            .writeln("RFC: CAAE56040051Q6")? // TODO: Make this dynamic
+            .writeln("AV. DE LAS PALMAS 4340 C.P. 22106")? // TODO: Make this dynamic
+            .writeln(" TIUANA BAJA CALIFORNIA")? // TODO: Make this dynamic
             .writeln("")?
-            .writeln("")?
-            .writeln("")?
-            .writeln("")?
-            .writeln("")?
-            .writeln("")?
+            .bold(true)?
+            .write("Folio: ")?
+            .bold(false)?
+            .writeln(ticket_data.id.as_str())?
             .writeln("")?;
 
         printer.print_cut()?;
@@ -90,6 +92,4 @@ pub fn print_ticket(ticket_data: &ticket) -> String {
             format!("Printing failed: {}", e)
         }
     }
-    */
-    "Printed successfully".to_string()
 }
