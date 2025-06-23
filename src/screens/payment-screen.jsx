@@ -272,14 +272,13 @@ const PaymentScreen = ({
   };
 
   const formatBalanceForPresetKey = () => {
-    const absBalance = Math.abs(balanceDue).toFixed(2);
-    if (balanceDue < 0) {
-      return `${absBalance}`;
-    } else if (balanceDue === 0) {
-      return `0`;
-    } else if (balanceDue > 0) {
-      return `0`;
+    let total_due_mxn = totalDue.toFixed(2);
+    let total_due_dlls = (totalDue.toFixed(2) / dollarToPesosRate).toFixed(2);
+
+    if (selectedMethods[0] === "DOLLARS") {
+      return `${total_due_dlls}`;
     }
+    return `${total_due_mxn}`;
   };
 
   const balanceDisplay = formatBalance();
@@ -714,9 +713,9 @@ const styles = {
     fontSize: "16px",
     border: "1px solid #ddd",
     borderRadius: "5px",
-    backgroundColor: "black", // Changed from #fff to #e0e0e0
+    backgroundColor: "#e0e0e0", // Changed from #fff to #e0e0e0
     cursor: "pointer",
-    color: "white",
+    color: "#444",
     fontWeight: "550",
     height: "100%",
     display: "flex",
