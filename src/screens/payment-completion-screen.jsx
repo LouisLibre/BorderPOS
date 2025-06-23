@@ -30,13 +30,26 @@ const PaymentCompletionScreen = ({ handleClose, paymentDetails }) => {
             currentTicket[0] &&
             currentTicket[0].ticket_id.slice(0, 7)}
     */
+    const ticket_date_str =
+      Array.isArray(paymentDetails.items) &&
+      paymentDetails.items[0] &&
+      paymentDetails.items[0].created_at;
+    const ticket_date = ticket_date_str
+      ? new Date(ticket_date_str.replace(" ", "T"))
+      : new Date();
+    const ticket_date_str_formatted = ticket_date
+      .toLocaleDateString("es-ES", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+      .replace(".", "")
+      .replaceAll(" ", "/")
+      .toUpperCase();
+
     const ticketData = {
       id: paymentDetails.ticketId.slice(0, 7),
-      created_at:
-        (Array.isArray(paymentDetails.items) &&
-          paymentDetails.items[0] &&
-          paymentDetails.items[0].created_at) ||
-        "",
+      created_at: ticket_date_str_formatted,
       pesos_paid: paymentDetails.pesosPaid,
       dollars_paid: paymentDetails.dollarsPaid,
       cards_paid: paymentDetails.cardsPaid,
