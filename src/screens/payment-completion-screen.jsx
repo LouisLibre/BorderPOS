@@ -3,11 +3,15 @@ import { Printer } from "lucide-react";
 import Modal from "@/components/modal";
 import { Button } from "@/components/ui/button";
 import { invoke } from "@tauri-apps/api/core";
+import useGlobalStore from "@/hooks/useGlobalStore";
 
 // trigger the update here, we have the paymentDetails
 
 const PaymentCompletionScreen = ({ handleClose, paymentDetails }) => {
   const [countdown, setCountdown] = useState(5);
+  const currentPrinter = useGlobalStore((state) => state.currentPrinter);
+
+  console.log({ currentPrinter });
 
   const hasPrinted = useRef(false);
 
@@ -65,7 +69,11 @@ const PaymentCompletionScreen = ({ handleClose, paymentDetails }) => {
       })),
     };
     console.log({ ticketData });
-    const ok = await invoke("print_ticket", { ticketData: ticketData });
+    const ok = await invoke("print_ticket", {
+      ticketData: ticketData,
+      vid: (currentPrinter && currentPrinter.vid) || 0,
+      pid: (currentPrinter && currentPrinter.pid) || 0,
+    });
     console.log({ ok });
   }
 

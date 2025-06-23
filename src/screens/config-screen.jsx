@@ -12,39 +12,7 @@ export default function ConfigScreen({ toggleDrawer }) {
 
   const db = useDatabase();
 
-  const db_select_thermal_printer = async () => {
-    try {
-      const sql = await db.getConnection();
-      const result = await sql.select(
-        "SELECT * FROM settings WHERE key = 'thermal_printer'"
-      );
-      if (result.length > 0) {
-        return JSON.parse(result[0].value);
-      }
-      return null;
-    } catch (err) {
-      console.error("Error getting thermal_printer:", err);
-      return null;
-    }
-  };
-
-  const db_update_thermal_printer = async (printer) => {
-    try {
-      const sql = await db.getConnection();
-      await sql.execute(
-        "INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)",
-        ["thermal_printer", JSON.stringify(printer)]
-      );
-    } catch (err) {
-      console.error("Error setting thermal_printer:", err);
-    }
-  };
-
   React.useEffect(() => {
-    db_select_thermal_printer().then((printer) => {
-      setCurrentPrinter(printer);
-    });
-
     invoke("get_printers")
       .then((_printers) => {
         setPrinters(_printers);
@@ -73,10 +41,8 @@ export default function ConfigScreen({ toggleDrawer }) {
         (printer) => printer.vid === vid && printer.pid === pid
       );
       setCurrentPrinter(selectedPrinter || null);
-      db_update_thermal_printer(selectedPrinter || null);
     } else {
       setCurrentPrinter(null); // Clear selection if "Selecciona Impresora" is chosen
-      db_update_thermal_printer(null);
     }
   };
 

@@ -32,6 +32,34 @@ export class DB {
       this.#connection = null;
     }
   }
+
+  static async select_thermal_printer() {
+    try {
+      const sql = await this.getConnection();
+      const result = await sql.select(
+        "SELECT * FROM settings WHERE key = 'thermal_printer'"
+      );
+      if (result.length > 0) {
+        return JSON.parse(result[0].value);
+      }
+      return null;
+    } catch (err) {
+      console.error("Error getting thermal_printer:", err);
+      return null;
+    }
+  }
+
+  static async updated_thermal_printer(printer) {
+    try {
+      const sql = await this.getConnection();
+      await sql.execute(
+        "INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)",
+        ["thermal_printer", JSON.stringify(printer)]
+      );
+    } catch (err) {
+      console.error("Error setting thermal_printer:", err);
+    }
+  }
 }
 
 export function useDatabase() {

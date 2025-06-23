@@ -30,9 +30,9 @@ struct UsbDevice {
 }
 
 #[tauri::command]
-fn print_ticket(ticket_data: ticket) -> String {
+fn print_ticket(ticket_data: ticket, vid: u16, pid: u16) -> String {
     println!("Saving user's preferences {ticket_data:#?}");
-    usbdriver::print_ticket(&ticket_data);
+    usbdriver::print_ticket(&ticket_data, vid, pid);
     println!("Printed successfully");
     "Printed successfully".to_string()
 }
