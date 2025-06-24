@@ -15,13 +15,15 @@ const defaultState = {
     }
   */
   printers: [],
+  exchange_rate_usd_to_mxn: 20,
   isSettingsLoading: true,
   settingsError: null,
+  renderTick: null,
 };
 
 const useGlobalStore = create((set, get) => ({
   ...defaultState,
-  initializeSettings: async () => {
+  _initializeSettings: async () => {
     if (!get().isSettingsLoading) {
       set({ isSettingsLoading: true, settingsError: null });
     }
@@ -116,8 +118,24 @@ const useGlobalStore = create((set, get) => ({
     }),
   clearCart: () => set({ cartItems: [] }),
   clearSettingsError: () => set({ settingsError: null }),
+  set_usd_to_mxn_exchange_rate: (rate) => {
+    const newRate = parseFloat(rate);
+    console.log({ rate, newRate });
+    if (!isNaN(newRate) && String(newRate) === String(rate).trim()) {
+      set({ exchange_rate_usd_to_mxn: parseFloat(newRate.toFixed(2)) });
+      console.log("New rate:", newRate);
+    } else {
+      // Keep the old rate
+      console.log("Invalid rate:", rate);
+      console.log("Old rate:", get().exchange_rate_usd_to_mxn);
+      set({
+        exchange_rate_usd_to_mxn: get().exchange_rate_usd_to_mxn,
+        renderTick: new Date(),
+      });
+    }
+  },
 }));
 
-useGlobalStore.getState().initializeSettings();
+useGlobalStore.getState()._initializeSettings();
 
 export default useGlobalStore;

@@ -1,14 +1,31 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import useGlobalStore from "@/hooks/useGlobalStore";
 import { useDatabase } from "@/services/db";
 
 export default function ConfigScreen({ toggleDrawer }) {
   const [printers, setPrinters] = React.useState([]);
-  const [exchangeRate, setExchangeRate] = React.useState(0);
+  const [exchangeRate, setExchangeRate] = React.useState("0");
 
   const setCurrentPrinter = useGlobalStore((state) => state.setCurrentPrinter);
   const currentPrinter = useGlobalStore((state) => state.currentPrinter);
+  const set_usd_to_mxn_exchange_rate = useGlobalStore(
+    (state) => state.set_usd_to_mxn_exchange_rate
+  );
+  const exchange_rate_usd_to_mxn = useGlobalStore(
+    (state) => state.exchange_rate_usd_to_mxn
+  );
+  const renderTick = useGlobalStore((state) => state.renderTick);
+
+  useEffect(() => {
+    console.log("Setting exchange rate to:", exchange_rate_usd_to_mxn);
+    setExchangeRate(exchange_rate_usd_to_mxn.toString());
+  }, [exchange_rate_usd_to_mxn, renderTick]);
+
+  const handleRateBlur = () => {
+    // 4. onBlur updates the SLOW global state after parsing.
+    set_usd_to_mxn_exchange_rate(exchangeRate);
+  };
 
   const db = useDatabase();
 
@@ -85,7 +102,7 @@ export default function ConfigScreen({ toggleDrawer }) {
               <select
                 className="bg-gray-50 border h-10 border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 onChange={handlePrinterSelect}
-                value={
+                initialValue={
                   currentPrinter
                     ? `${currentPrinter.vid},${currentPrinter.pid}`
                     : ""
@@ -127,6 +144,7 @@ export default function ConfigScreen({ toggleDrawer }) {
                 placeholder="Enter exchange rate"
                 value={exchangeRate}
                 onChange={(event) => setExchangeRate(event.target.value)}
+                onBlur={handleRateBlur}
               />
             </div>
           </div>
