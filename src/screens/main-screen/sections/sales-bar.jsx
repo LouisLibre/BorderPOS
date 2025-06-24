@@ -28,7 +28,9 @@ export function SalesBar() {
   const tabsListRef = useRef(null);
   const db = useDatabase();
 
-  const dollarToPesosRate = 20;
+  const dollarToPesosRate = useGlobalStore(
+    (state) => state.exchange_rate_usd_to_mxn
+  );
 
   const cartItems = useGlobalStore((state) => state.cartItems);
   const removeItem = useGlobalStore((state) => state.removeItem);

@@ -49,7 +49,7 @@ export class DB {
     }
   }
 
-  static async updated_thermal_printer(printer) {
+  static async update_thermal_printer(printer) {
     try {
       const sql = await this.getConnection();
       await sql.execute(
@@ -58,6 +58,40 @@ export class DB {
       );
     } catch (err) {
       console.error("Error setting thermal_printer:", err);
+    }
+  }
+
+  static async get_exchange_rate() {
+    try {
+      const db = await this.getConnection();
+      const result = await db.select(
+        "SELECT value FROM settings WHERE key = 'exchange_rate_usd_to_mxn'"
+      );
+      if (result.length > 0) {
+        const rate = parseFloat(result[0].value);
+        return isNaN(rate) ? 20.0 : rate; // Default to 20.0 if invalid
+      }
+      return 20.0; // Default if no rate is found
+    } catch (err) {
+      console.error("Error retrieving exchange rate:", err);
+      error(`Error retrieving exchange rate: ${err}`);
+      return 20.0; // Default on error
+    }
+  }
+
+  static async update_exchange_rate(rate) {
+    try {
+      const db = await this.getConnection();
+      const fixedRate = rate.toFixed(2); // Ensure 2 decimal places
+      await db.execute(
+        "INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)",
+        ["exchange_rate_usd_to_mxn", fixedRate]
+      );
+      info(`Exchange rate updated to ${fixedRate}`);
+    } catch (err) {
+      console.error("Error updating exchange rate:", err);
+      error(`Error updating exchange rate: ${err}`);
+      throw err;
     }
   }
 }

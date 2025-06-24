@@ -4,9 +4,6 @@ import useGlobalStore from "@/hooks/useGlobalStore";
 import { useDatabase } from "@/services/db";
 
 export default function ConfigScreen({ toggleDrawer }) {
-  const [printers, setPrinters] = React.useState([]);
-  const [exchangeRate, setExchangeRate] = React.useState("0");
-
   const setCurrentPrinter = useGlobalStore((state) => state.setCurrentPrinter);
   const currentPrinter = useGlobalStore((state) => state.currentPrinter);
   const set_usd_to_mxn_exchange_rate = useGlobalStore(
@@ -16,6 +13,11 @@ export default function ConfigScreen({ toggleDrawer }) {
     (state) => state.exchange_rate_usd_to_mxn
   );
   const renderTick = useGlobalStore((state) => state.renderTick);
+
+  const [printers, setPrinters] = React.useState([]);
+  const [exchangeRate, setExchangeRate] = React.useState(
+    `${exchange_rate_usd_to_mxn}`
+  );
 
   useEffect(() => {
     console.log("Setting exchange rate to:", exchange_rate_usd_to_mxn);
@@ -102,15 +104,13 @@ export default function ConfigScreen({ toggleDrawer }) {
               <select
                 className="bg-gray-50 border h-10 border-gray-300 text-gray-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 onChange={handlePrinterSelect}
-                initialValue={
+                value={
                   currentPrinter
                     ? `${currentPrinter.vid},${currentPrinter.pid}`
                     : ""
                 }
               >
-                <option value="" disabled>
-                  Selecciona Impresora
-                </option>
+                <option value="">Selecciona Impresora</option>
                 {printers.map((printer) => (
                   <option
                     key={`${printer.vid},${printer.pid}`}

@@ -28,17 +28,19 @@ const useGlobalStore = create((set, get) => ({
       set({ isSettingsLoading: true, settingsError: null });
     }
     try {
-      const [printer, usbPrinters] = await Promise.all([
+      const [printer, usbPrinters, savedRate] = await Promise.all([
         DB.select_thermal_printer(),
         invoke("get_printers").catch((err) => {
           console.error("Error getting printers:", err);
           return []; // Return a default/fallback value
         }),
+        DB.get_exchange_rate(),
       ]);
       set({
         currentPrinter: printer || null,
         printers: Array.isArray(usbPrinters) ? usbPrinters : [],
         isSettingsLoading: false,
+        exchange_rate_usd_to_mxn: parseFloat(savedRate),
         settingsError: null,
       });
     } catch (err) {
@@ -118,19 +120,28 @@ const useGlobalStore = create((set, get) => ({
     }),
   clearCart: () => set({ cartItems: [] }),
   clearSettingsError: () => set({ settingsError: null }),
-  set_usd_to_mxn_exchange_rate: (rate) => {
+  set_usd_to_mxn_exchange_rate: async (rate) => {
     const newRate = parseFloat(rate);
     console.log({ rate, newRate });
     if (!isNaN(newRate) && String(newRate) === String(rate).trim()) {
-      set({ exchange_rate_usd_to_mxn: parseFloat(newRate.toFixed(2)) });
+      set({
+        exchange_rate_usd_to_mxn: parseFloat(newRate.toFixed(2)),
+        renderTick: Date.now(),
+      });
       console.log("New rate:", newRate);
+      try {
+        await DB.update_exchange_rate(newRate);
+      } catch (err) {
+        console.error("Error saving exchange rate:", err);
+        // Optionally revert to old rate or handle error
+      }
     } else {
       // Keep the old rate
       console.log("Invalid rate:", rate);
       console.log("Old rate:", get().exchange_rate_usd_to_mxn);
       set({
         exchange_rate_usd_to_mxn: get().exchange_rate_usd_to_mxn,
-        renderTick: new Date(),
+        renderTick: Date.now(),
       });
     }
   },
