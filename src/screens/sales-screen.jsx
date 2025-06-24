@@ -53,13 +53,14 @@ const TicketModal = ({ isOpen, onClose, children }) => {
           >
             Imprimir
           </button>
+          {/* 
           <button
             onClick={onClose}
             className="mr-2 px-4 py-2 bg-white text-black border border-gray-400 rounded-md hover:bg-gray-50 cursor-pointer"
           >
             Descargar PDF
           </button>
-          {/* Add more footer buttons if needed */}
+          Add more footer buttons if needed */}
         </div>
       </div>
     </div>
