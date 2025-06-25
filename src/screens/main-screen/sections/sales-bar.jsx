@@ -222,12 +222,14 @@ export function SalesBar() {
             */}
             </TabsList>
           </Tabs>
-          {/* TODO: Remove commented code when ready to implement 
-        <Button variant="ghost" size="sm" className="flex-none bg-background">
-          {" "}
-          <Plus className="h-4 w-4" />
-        </Button>
-        */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-none bg-background text-gray-600 w-4 h-6 hover:text-destructive"
+            onClick={clearCart}
+          >
+            <Trash className="h-2 w-2" style={{ marginRight: "2px" }} />
+          </Button>
         </div>
 
         <div className="flex-1 flex flex-col select-none overflow-y-auto pb-[55px]">
@@ -345,6 +347,7 @@ export function SalesBar() {
                     <td style={{ verticalAlign: "middle" }} className="mt-3">
                       <Button
                         variant="ghost"
+                        size="sm"
                         className="text-gray-600 w-4 h-6 hover:text-destructive"
                         onClick={() => {
                           removeItem(item.sku);
@@ -400,8 +403,8 @@ export function SalesBar() {
 
         {/* TODO: If taxes are 0, don't show the sub-total and taxes rows 
         Perhaps use Alegro POS taxes UX */}
-        <div className="pb-4 pl-3 pr-3 pt-2 flex flex-col items-end border-t-[1.5px] shrink-0 ">
-          <div className="w-full mb-2 pr-2 ">
+        <div className="pb-4 pl-3 pr-3 pt-2 flex flex-row items-start border-t-[1.5px] shrink-0 basis-[150px]">
+          <div className="w-[45%] flex flex-col">
             <div className="flex justify-between items-center text-muted-foreground text-sm min-h-8">
               <div>Subtotal</div>
               <div className="font-bold text-right">${subtotal.toFixed(2)}</div>
@@ -425,27 +428,17 @@ export function SalesBar() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-[8px] w-full">
+          <div className="w-[55%] flex flex-col pl-4 pt-2 justify-between  h-full">
             <Button
+              variant="default_unhovered"
               onClick={() => setIsPaymentModalOpen(true)}
-              className="flex justify-between items-center bg-black text-white hover:bg-black/70 h-16"
+              className={`flex flex-col justify-center items-center text-white h-full ${
+                total > 0 ? "hover:bg-black/70" : "opacity-50"
+              }`}
             >
               <div className="text-xl">Pagar</div>
               <div className="text-xl font-bold text-right">
                 ${total.toFixed(2)}
-              </div>
-            </Button>
-            <Button
-              variant="outline"
-              className="flex justify-between items-center h-12"
-              onClick={clearCart}
-            >
-              <div
-                className="text-lg"
-                style={{ display: "flex", alignItems: "center" }}
-              >
-                Deshacer ticket
-                <RotateCcw style={{ marginLeft: "6px" }} />
               </div>
             </Button>
           </div>

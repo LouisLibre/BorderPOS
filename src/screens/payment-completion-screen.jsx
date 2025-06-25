@@ -18,26 +18,25 @@ const PaymentCompletionScreen = ({ handleClose, paymentDetails }) => {
   async function printTicket(paymentDetails) {
     /*
     // console.log({ paymentDetails });
-    ticketId: 'sadfasdf'
-    cardsPaid: 0
-    change: 0
-    dollarsPaid: 0
+    {
+    ticketId: 'sadfasdf',
+    totalDue: 100,
     items: [
-     {sku: "1008", plu_code: "1008", barcode: null, product_name: "Tortilla Burro", price: 65, …}
-     {sku: "1007", plu_code: "1007", barcode: null, product_name: "Tortilla Integral Chica", price: 46, …}
-     {sku: "1006", plu_code: "1006", barcode: null, product_name: "Tortilla Integral con azúcar", price: 75, …}
+     {sku: "1008", plu_code: "1008", barcode: null, product_name: "Tortilla Burro", price: 65, qunantity: 1, snapshot_created_at: "2023-03-25T00:29:52.000Z"}
     ]
-    othersPaid: 0
-    pesosPaid: 278
-    totalPaid: 278
-                Array.isArray(currentTicket) &&
-            currentTicket[0] &&
-            currentTicket[0].ticket_id.slice(0, 7)}
+    dollarsPaid: payments.DOLLARS,
+    pesosPaid: payments.CASH,
+    cardsPaid: payments.CARD,
+    othersPaid: payments.OTHER,
+    totalPaid: parseFloat(calculateTotalPaid()),
+    change: parseFloat(balanceDue) > 0 ? parseFloat(balanceDue) : 0,
+    };
     */
+    console.log({ firstItem: paymentDetails.items[0] });
     const ticket_date_str =
       Array.isArray(paymentDetails.items) &&
       paymentDetails.items[0] &&
-      paymentDetails.items[0].created_at;
+      paymentDetails.items[0].snapshot_created_at;
     const ticket_date = ticket_date_str
       ? new Date(ticket_date_str.replace(" ", "T"))
       : new Date();

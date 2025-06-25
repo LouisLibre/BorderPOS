@@ -129,7 +129,10 @@ pub fn print_ticket(ticket_data: &ticket, vid: u16, pid: u16) -> String {
         let aligned_payment_label = format!("{:>label_padding$}", payment_label);
         printer.write(&aligned_payment_label)?;
         // Create aligned payment amount using the aligned_total_str as padding
-        let aligned_payment_amount: String = format!("${}", payment_amount);
+        let amount_padding = total_amount.len();
+        let payment_amount_formatted: String = format!("${}", payment_amount);
+        let aligned_payment_amount: String =
+            format!("{:>amount_padding$}", payment_amount_formatted);
         printer.writeln(&aligned_payment_amount)?;
 
         // SU PAGO USD
@@ -140,7 +143,7 @@ pub fn print_ticket(ticket_data: &ticket, vid: u16, pid: u16) -> String {
         printer.write(&aligned_payment_label)?;
         // Create aligned payment amount using the aligned_total_str as padding
         let amount_padding = total_amount.len();
-        let payment_amount_formatted = format!("${}", payment_amount);
+        let payment_amount_formatted: String = format!("${}", payment_amount);
         let aligned_payment_amount: String =
             format!("{:>amount_padding$}", payment_amount_formatted);
         printer.writeln(&aligned_payment_amount)?;

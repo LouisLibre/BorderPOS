@@ -1,9 +1,17 @@
 import React from "react";
 import { useDatabase } from "@/services/db";
 import useGlobalStore from "@/hooks/useGlobalStore";
+import { invoke } from "@tauri-apps/api/core";
+import { print_ticket } from "@/lib/utils";
 
-const TicketModal = ({ isOpen, onClose, children }) => {
-  const currentPrinter = useGlobalStore((state) => state.currentPrinter);
+const TicketModal = ({
+  currentTicket,
+  currentTicketItems,
+  isOpen,
+  onClose,
+  children,
+}) => {
+  const current_printer = useGlobalStore((state) => state.currentPrinter);
   // Close modal on Escape key
   React.useEffect(() => {
     const handleEsc = (e) => {
@@ -12,6 +20,27 @@ const TicketModal = ({ isOpen, onClose, children }) => {
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [onClose]);
+
+  const hanldePrintButton = () => {
+    let _ticket_data = {
+      ticketId: currentTicket.id.slice(0, 7),
+      totalDue: currentTicket.total_due,
+      items: currentTicketItems.map((item) => ({
+        line_item_product_name: item.line_item_product_name,
+        line_item_quantity: parseFloat(item.line_item_quantity),
+        line_item_price: parseFloat(item.line_item_price),
+        line_item_total: parseFloat(item.line_item_total),
+      })),
+      dollarsPaid: currentTicket.dollars_paid,
+      pesosPaid: currentTicket.pesos_paid,
+      cardsPaid: currentTicket.cards_paid,
+      othersPaid: currentTicket.others_paid,
+      totalPaid: currentTicket.total_paid,
+      change: currentTicket.change,
+    };
+    print_ticket(_ticket_data, current_printer);
+    onClose();
+  };
 
   if (!isOpen) return null;
 
@@ -37,18 +66,18 @@ const TicketModal = ({ isOpen, onClose, children }) => {
         {/* Footer */}
         <div className="flex-shrink-0 p-4 border-t text-right">
           <div className="flex items-center pr-2">
-            {currentPrinter ? (
+            {current_printer ? (
               <p>
-                Selected Printer: {currentPrinter.manufacturer} -{" "}
-                {currentPrinter.product} (VID: {currentPrinter.vid}, PID:{" "}
-                {currentPrinter.pid})
+                Selected Printer: {current_printer.manufacturer} -{" "}
+                {current_printer.product} (VID: {current_printer.vid}, PID:{" "}
+                {current_printer.pid})
               </p>
             ) : (
               <p>No printer selected</p>
             )}
           </div>
           <button
-            onClick={onClose}
+            onClick={hanldePrintButton}
             className="mr-3 px-4 py-2 bg-white text-black border border-gray-400 rounded-md hover:bg-gray-50 cursor-pointer"
           >
             Imprimir
@@ -70,8 +99,9 @@ const TicketModal = ({ isOpen, onClose, children }) => {
 export default function SalesScreen({ toggleDrawer }) {
   const [sales, setSales] = React.useState([]);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [currentTicketID, setCurrentTicketID] = React.useState(null);
   const [currentTicket, setCurrentTicket] = React.useState(null);
+  const [currentTicketID, setCurrentTicketID] = React.useState(null);
+  const [currentTicketItems, setCurrentTicketItems] = React.useState(null);
 
   const db = useDatabase();
 
@@ -131,11 +161,11 @@ export default function SalesScreen({ toggleDrawer }) {
         [ticketID]
       );
       console.log(rows);
-      setCurrentTicket(rows);
+      setCurrentTicketItems(rows);
       //setTicket(rows[0]);
     } catch (err) {
       console.error("Error querying ticket:", err.message);
-      setCurrentTicket(null);
+      setCurrentTicketItems(null);
     }
   };
 
@@ -219,6 +249,7 @@ export default function SalesScreen({ toggleDrawer }) {
                         <button
                           onClick={() => {
                             setCurrentTicketID(sale.id);
+                            setCurrentTicket(sale);
                             setIsModalOpen(true);
                           }}
                           className="text-sm text-blue-600 flex items-center px-3 py-2 text-base font-medium bg-white border rounded-sm hover:shadow-[0px_1.5px_1px_0px_rgba(0,0,0,0.1)] hover:shadow-blue-300 cursor-pointer"
@@ -239,9 +270,12 @@ export default function SalesScreen({ toggleDrawer }) {
       </div>
       <TicketModal
         isOpen={isModalOpen}
+        currentTicket={currentTicket}
+        currentTicketItems={currentTicketItems}
         onClose={() => {
-          setCurrentTicketID(null);
           setCurrentTicket(null);
+          setCurrentTicketID(null);
+          setCurrentTicketItems(null);
           setIsModalOpen(false);
         }}
       >
@@ -249,20 +283,20 @@ export default function SalesScreen({ toggleDrawer }) {
           Tortilleria Sinaloa
           <br />
           Ticked ID:{" "}
-          {currentTicket &&
-            Array.isArray(currentTicket) &&
-            currentTicket[0] &&
-            currentTicket[0].ticket_id.slice(0, 7)}
+          {currentTicketItems &&
+            Array.isArray(currentTicketItems) &&
+            currentTicketItems[0] &&
+            currentTicketItems[0].ticket_id.slice(0, 7)}
           <br />
           Fecha:{" "}
-          {currentTicket &&
-            Array.isArray(currentTicket) &&
-            currentTicket[0] &&
-            currentTicket[0].snapshot_created_at}
+          {currentTicketItems &&
+            Array.isArray(currentTicketItems) &&
+            currentTicketItems[0] &&
+            currentTicketItems[0].snapshot_created_at}
           <br />
           <br />
-          {currentTicket &&
-            currentTicket.map((item) => (
+          {currentTicketItems &&
+            currentTicketItems.map((item) => (
               <div>
                 {item.line_item_product_name}
                 <br />
@@ -274,8 +308,8 @@ export default function SalesScreen({ toggleDrawer }) {
               </div>
             ))}
           Total: $
-          {currentTicket &&
-            currentTicket
+          {currentTicketItems &&
+            currentTicketItems
               .reduce((sum, item) => {
                 const itemTotal = item.line_item_total
                   ? parseFloat(item.line_item_total)
