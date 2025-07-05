@@ -13,7 +13,7 @@ use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_sql::{Builder, DbInstances, DbPool, Migration, MigrationKind};
 //use tinyfiledialogs as tfd;
 use sqlx::{pool, Pool, Row, Sqlite};
-use std::hash::{Hash, Hasher};
+use std::hash::{Hash, Hasher, SipHasher};
 use tfd;
 
 const CORRECT_IMPORT_PASSWORD: &str = "harina123"; // CHANGE THIS!
@@ -56,6 +56,29 @@ fn print_ticket(ticket_data: ticket, vid: u16, pid: u16, printer_name: String) -
     }
     println!("Printed successfully");
     "Printed successfully".to_string()
+}
+
+#[cfg(windows)]
+fn generate_vid_pid(printer: &WindowsPrinter) -> (u16, u16) {
+    let mut hasher = SipHasher::new();
+    let unique_key = format!(
+        "{}{}{}",
+        printer.get_name(),
+        printer.port_name,
+        printer.driver_name
+    );
+    unique_key.hash(&mut hasher);
+    let hash = hasher.finish();
+
+    // Extract 16-bit VID and PID
+    let vid = (hash & 0xFFFF) as u16;
+    let pid = ((hash >> 16) & 0xFFFF) as u16;
+
+    // Ensure non-zero values (USB VID/PID are typically non-zero)
+    let vid = if vid == 0 { 0xFFFF } else { vid };
+    let pid = if pid == 0 { 0xFFFF } else { pid };
+
+    (vid, pid)
 }
 
 #[tauri::command]
@@ -145,10 +168,13 @@ fn get_printers() -> Result<Vec<UsbDevice>, String> {
             println!("is_ready: {:?}", is_ready);
             println!("p.port_name: {:?}", p.port_name);
             println!("p.driver_name: {:?}", p.driver_name);
+            let (vid, pid) = generate_vid_pid(&p);
+            println!("vid: {:?}", vid);
+            println!("pid: {:?}", pid);
 
             devices_info.push(UsbDevice {
-                vid: 0,                             // Placeholder: WindowsPrinter likely doesn't provide VID
-                pid: 0, // Placeholder: WindowsPrinter likely doesn't provide PID
+                vid: vid,                           // Placeholder: WindowsPrinter likely doesn't provide VID
+                pid: pid, // Placeholder: WindowsPrinter likely doesn't provide PID
                 manufacturer: "Device".to_string(), // Adjust if manufacturer info available
                 product: format!("{}", printer_name),
             });
