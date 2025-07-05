@@ -323,7 +323,7 @@ pub fn run() {
         .plugin(
             tauri_plugin_sql::Builder::default()
                 .add_migrations(
-                    "sqlite:pos_demo.db",
+                    "sqlite:pos_demo3.db",
                     vec![Migration {
                         version: 1,
                         description: "schema migration",
