@@ -259,6 +259,7 @@ pub fn run() {
                 if event.id() == import_csv.id() {
                     println!("'Import CSV' clicked. Requesting password via tfd.");
 
+                    /*
                     // let import_Password =get_database_settings_table_password_key_value(&app_handle);
                     let app_handle_clone = app_handle.clone();
                     let password_result = tauri::async_runtime::block_on(
@@ -305,6 +306,7 @@ pub fn run() {
                             .run_modal();
                         return; // Exit this event handling
                     }
+                    */
 
                     let app_handle_clone = app_handle.clone();
                     app_handle
