@@ -26,7 +26,7 @@ use types::ticket;
 mod windows_printing;
 
 #[cfg(windows)]
-use windows_printing::WindowsPrinter;
+use windows_printing::*;
 
 #[derive(Serialize)]
 struct UsbDevice {
@@ -46,7 +46,10 @@ fn print_ticket(ticket_data: ticket, vid: u16, pid: u16, printer_name: String) -
     }
     #[cfg(windows)]
     {
-        let driver = WindowsPrinter::from_str(printer_name.as_str()).unwrap();
+        use std::slice::Windows;
+
+        let windows_printer = WindowsPrinter::from_str(printer_name.as_str()).unwrap();
+        let driver = WindowsDriver::open(&windows_printer).unwrap();
         ticket_printer::print_ticket(driver, &ticket_data);
     }
     println!("Printed successfully");
