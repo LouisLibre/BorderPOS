@@ -62,6 +62,7 @@ export async function print_ticket(ticket_data, printer_info) {
     ticketData: formatted_ticket_data,
     vid: (printer_info && printer_info.vid) || 0,
     pid: (printer_info && printer_info.pid) || 0,
+    printerName: (printer_info && printer_info.product) || "",
   });
   console.log({ ok });
 }

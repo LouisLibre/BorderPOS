@@ -44,12 +44,11 @@ fn format_sale_item(
 // usb driver address: vendor id, product id
 // TODO: Agregarle el header ( nombre empresa, direccion, rfc ) desde la configuracion de la app
 // TODO: Pasar el vendor_id y product_id de la configuracion de la app
-pub fn print_ticket(ticket_data: &ticket, vid: u16, pid: u16) -> String {
+pub fn print_ticket<D: Driver>(driver: D, ticket_data: &ticket) -> String {
     // We define an inner function or a closure that performs the printing.
     // This closure IS allowed to return a Result and use the `?` operator.
     let print_logic = || -> Result<(), PrinterError> {
         // All the code that can fail goes inside here.
-        let driver = UsbDriver::open(vid, pid, None)?;
         let mut printer = Printer::new(driver, Protocol::default(), None);
         let print_msg = format!("Hello, {}! Desde Rust!", ticket_data.id);
         println!("This got executed");

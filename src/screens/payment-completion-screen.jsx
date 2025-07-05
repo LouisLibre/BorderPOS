@@ -72,6 +72,7 @@ const PaymentCompletionScreen = ({ handleClose, paymentDetails }) => {
       ticketData: ticketData,
       vid: (currentPrinter && currentPrinter.vid) || 0,
       pid: (currentPrinter && currentPrinter.pid) || 0,
+      printerName: (printer_info && printer_info.product) || "",
     });
     console.log({ ok });
   }

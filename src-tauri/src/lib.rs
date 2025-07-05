@@ -16,8 +16,9 @@ use sqlx::{pool, Pool, Row, Sqlite};
 use tfd;
 const CORRECT_IMPORT_PASSWORD: &str = "harina123"; // CHANGE THIS!
 
+pub mod ticket_printer;
 pub mod types;
-pub mod usbdriver;
+use escpos::driver::*;
 
 use types::ticket;
 
@@ -36,9 +37,18 @@ struct UsbDevice {
 }
 
 #[tauri::command]
-fn print_ticket(ticket_data: ticket, vid: u16, pid: u16) -> String {
+fn print_ticket(ticket_data: ticket, vid: u16, pid: u16, printer_name: String) -> String {
     println!("Saving user's preferences {ticket_data:#?}");
-    usbdriver::print_ticket(&ticket_data, vid, pid);
+    #[cfg(not(windows))]
+    {
+        let driver = UsbDriver::open(vid, pid, None).unwrap();
+        ticket_printer::print_ticket(driver, &ticket_data);
+    }
+    #[cfg(windows)]
+    {
+        let driver = WindowsPrinter::from_str(printer_name.as_str()).unwrap();
+        ticket_printer::print_ticket(driver, &ticket_data);
+    }
     println!("Printed successfully");
     "Printed successfully".to_string()
 }
