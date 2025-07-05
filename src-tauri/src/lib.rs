@@ -128,9 +128,9 @@ fn get_printers() -> Result<Vec<UsbDevice>, String> {
             let is_ready = p.is_ready;
 
             devices_info.push(UsbDevice {
-                vid: 0, // Placeholder: WindowsPrinter likely doesn't provide VID
+                vid: 0,                             // Placeholder: WindowsPrinter likely doesn't provide VID
                 pid: 0, // Placeholder: WindowsPrinter likely doesn't provide PID
-                manufacturer: "<unknown>".to_string(), // Adjust if manufacturer info available
+                manufacturer: "Device".to_string(), // Adjust if manufacturer info available
                 product: format!("{}", printer_name),
             });
         }
