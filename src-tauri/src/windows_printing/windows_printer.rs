@@ -21,10 +21,19 @@ pub struct WindowsPrinter {
     pub is_ready: bool, // Offline or busy printers are not ready
     raw_status: u32,
     raw_attributes: u32,
+    pub port_name: String,
+    pub driver_name: String,
 }
 
 impl WindowsPrinter {
-    pub fn new(printer_name: PWSTR, is_ready: bool, raw_status: u32, raw_attributes: u32) -> Self {
+    pub fn new(
+        printer_name: PWSTR,
+        is_ready: bool,
+        raw_status: u32,
+        raw_attributes: u32,
+        port_name: String,
+        driver_name: String,
+    ) -> Self {
         unsafe {
             let mut raw_vec = printer_name.as_wide().to_vec();
             raw_vec.push(0x0);
@@ -36,6 +45,8 @@ impl WindowsPrinter {
                 is_ready: is_ready,
                 raw_status: raw_status,
                 raw_attributes: raw_attributes,
+                port_name: port_name.clone(),
+                driver_name: driver_name.clone(),
             }
         }
     }
@@ -107,7 +118,26 @@ impl WindowsPrinter {
                 .iter()
                 .map(|info| {
                     let is_ready = info.Status == 0;
-                    WindowsPrinter::new(info.pPrinterName, is_ready, info.Status, info.Attributes)
+                    let mut raw_vec = info.pPortName.as_wide().to_vec();
+                    raw_vec.push(0x0);
+                    raw_vec.push(0x0);
+                    let pPortName =
+                        unsafe { PWSTR(raw_vec.clone().as_mut_ptr()).to_string().unwrap() };
+
+                    let mut raw_vec = info.pDriverName.as_wide().to_vec();
+                    raw_vec.push(0x0);
+                    raw_vec.push(0x0);
+                    let pDriverName =
+                        unsafe { PWSTR(raw_vec.clone().as_mut_ptr()).to_string().unwrap() };
+
+                    WindowsPrinter::new(
+                        info.pPrinterName,
+                        is_ready,
+                        info.Status,
+                        info.Attributes,
+                        pPortName.clone(),
+                        pDriverName.clone(),
+                    )
                 })
                 .collect::<Vec<WindowsPrinter>>();
             Ok(printers)

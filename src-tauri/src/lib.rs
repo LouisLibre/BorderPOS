@@ -13,7 +13,9 @@ use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_sql::{Builder, DbInstances, DbPool, Migration, MigrationKind};
 //use tinyfiledialogs as tfd;
 use sqlx::{pool, Pool, Row, Sqlite};
+use std::hash::{Hash, Hasher};
 use tfd;
+
 const CORRECT_IMPORT_PASSWORD: &str = "harina123"; // CHANGE THIS!
 
 pub mod ticket_printer;
@@ -139,6 +141,10 @@ fn get_printers() -> Result<Vec<UsbDevice>, String> {
         for p in printers {
             let printer_name = p.get_name();
             let is_ready = p.is_ready;
+            println!("printer_name: {:?}", printer_name);
+            println!("is_ready: {:?}", is_ready);
+            println!("p.port_name: {:?}", p.port_name);
+            println!("p.driver_name: {:?}", p.driver_name);
 
             devices_info.push(UsbDevice {
                 vid: 0,                             // Placeholder: WindowsPrinter likely doesn't provide VID
