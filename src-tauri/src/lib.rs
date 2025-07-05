@@ -21,6 +21,9 @@ pub mod usbdriver;
 
 use types::ticket;
 
+#[cfg(windows)]
+mod windows_printing;
+
 #[derive(Serialize)]
 struct UsbDevice {
     vid: u16,
@@ -39,68 +42,97 @@ fn print_ticket(ticket_data: ticket, vid: u16, pid: u16) -> String {
 
 #[tauri::command]
 fn get_printers() -> Result<Vec<UsbDevice>, String> {
-    let timeout = Duration::from_millis(1000);
-    let mut devices_info = Vec::new();
+    #[cfg(not(windows))]
+    {
+        let timeout = Duration::from_millis(1000);
+        let mut devices_info = Vec::new();
 
-    for device in rusb::devices().map_err(|e| e.to_string())?.iter() {
-        let device_desc = match device.device_descriptor() {
-            Ok(desc) => desc,
-            Err(e) => {
-                eprintln!(
-                    "Bus {:03} Device {:03}: Could not get device descriptor: {}",
-                    device.bus_number(),
-                    device.address(),
-                    e
-                );
-                continue;
-            }
-        };
-
-        let mut manufacturer = String::from("<none>");
-        let mut product = String::from("<none>");
-
-        if let Ok(handle) = device.open() {
-            match handle.read_languages(timeout) {
-                Ok(languages) if !languages.is_empty() => {
-                    if let Some(idx) = device_desc.manufacturer_string_index() {
-                        if idx > 0 {
-                            manufacturer = handle
-                                .read_string_descriptor_ascii(idx)
-                                .unwrap_or_else(|e| format!("<read error: {:?}>", e));
-                        }
-                    }
-                    if let Some(idx) = device_desc.product_string_index() {
-                        if idx > 0 {
-                            product = handle
-                                .read_string_descriptor_ascii(idx)
-                                .unwrap_or_else(|e| format!("<read error: {:?}>", e));
-                        }
-                    }
-                }
-                Ok(_) => {
-                    manufacturer = String::from("<no languages reported>");
-                    product = String::from("<no languages reported>");
-                }
+        for device in rusb::devices().map_err(|e| e.to_string())?.iter() {
+            let device_desc = match device.device_descriptor() {
+                Ok(desc) => desc,
                 Err(e) => {
-                    let err_msg = format!("<lang read error: {:?}>", e);
-                    manufacturer = err_msg.clone();
-                    product = err_msg;
+                    eprintln!(
+                        "Bus {:03} Device {:03}: Could not get device descriptor: {}",
+                        device.bus_number(),
+                        device.address(),
+                        e
+                    );
+                    continue;
                 }
+            };
+
+            let mut manufacturer = String::from("<none>");
+            let mut product = String::from("<none>");
+
+            if let Ok(handle) = device.open() {
+                match handle.read_languages(timeout) {
+                    Ok(languages) if !languages.is_empty() => {
+                        if let Some(idx) = device_desc.manufacturer_string_index() {
+                            if idx > 0 {
+                                manufacturer = handle
+                                    .read_string_descriptor_ascii(idx)
+                                    .unwrap_or_else(|e| format!("<read error: {:?}>", e));
+                            }
+                        }
+                        if let Some(idx) = device_desc.product_string_index() {
+                            if idx > 0 {
+                                product = handle
+                                    .read_string_descriptor_ascii(idx)
+                                    .unwrap_or_else(|e| format!("<read error: {:?}>", e));
+                            }
+                        }
+                    }
+                    Ok(_) => {
+                        manufacturer = String::from("<no languages reported>");
+                        product = String::from("<no languages reported>");
+                    }
+                    Err(e) => {
+                        let err_msg = format!("<lang read error: {:?}>", e);
+                        manufacturer = err_msg.clone();
+                        product = err_msg;
+                    }
+                }
+            } else {
+                let err_msg = String::from("<could not open device>");
+                manufacturer = err_msg.clone();
+                product = err_msg;
             }
-        } else {
-            let err_msg = String::from("<could not open device>");
-            manufacturer = err_msg.clone();
-            product = err_msg;
+
+            devices_info.push(UsbDevice {
+                vid: device_desc.vendor_id(),
+                pid: device_desc.product_id(),
+                manufacturer: manufacturer.trim().to_string(),
+                product: product.trim().to_string(),
+            });
+        }
+        Ok(devices_info)
+    }
+    #[cfg(windows)]
+    {
+        // Get printers, return error if failed
+        let mut devices_info = Vec::new();
+
+        let printers = WindowsPrinter::list_printers()
+            .map_err(|e| format!("Could not list printers: {}", e))?;
+
+        // If no printers, return empty vector
+        if printers.is_empty() {
+            return Ok(devices_info);
         }
 
-        devices_info.push(UsbDevice {
-            vid: device_desc.vendor_id(),
-            pid: device_desc.product_id(),
-            manufacturer: manufacturer.trim().to_string(),
-            product: product.trim().to_string(),
-        });
+        for p in printers {
+            let printer_name = p.get_name();
+            let is_ready = p.is_ready;
+
+            devices_info.push(UsbDevice {
+                vid: 0, // Placeholder: WindowsPrinter likely doesn't provide VID
+                pid: 0, // Placeholder: WindowsPrinter likely doesn't provide PID
+                manufacturer: "<unknown>".to_string(), // Adjust if manufacturer info available
+                product: format!("{}", printer_name),
+            });
+        }
+        Ok(devices_info)
     }
-    Ok(devices_info)
 }
 async fn get_database_settings_table_password_key_value(
     app_handle: &AppHandle,

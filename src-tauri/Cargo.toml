@@ -30,3 +30,6 @@ escpos = { version = "0.15.2", features = ["full"] }
 rusb = "0.9.4" # Adjust version as needed
 tfd = "0.1.0"
 sqlx = { version = "0.8.3", features = ["runtime-tokio", "sqlite"] }
+
+[target.'cfg(windows)'.dependencies]
+windows = {version = "0.56.0", features = ["Win32_Graphics_Printing", "Win32_Graphics_Gdi", "Win32_Security"]}
