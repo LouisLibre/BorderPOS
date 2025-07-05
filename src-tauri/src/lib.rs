@@ -24,6 +24,9 @@ use types::ticket;
 #[cfg(windows)]
 mod windows_printing;
 
+#[cfg(windows)]
+use windows_printing::WindowsPrinter;
+
 #[derive(Serialize)]
 struct UsbDevice {
     vid: u16,
